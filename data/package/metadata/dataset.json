@@ -1,0 +1,55 @@
+{
+  "dataset_id": "huidu_xingyun_portable",
+  "version": "1.0.0",
+  "generated_at": "2026-09-07T14:25:34+08:00",
+  "project_name": "慧读星云：基于AI知识图谱的《星云大师全集》人间佛教智能研析与知识服务平台",
+  "purpose": "竞赛演示、离线部署与LangChain运行的规范化只读数据包",
+  "source_baselines": {
+    "corpus": "hsingyun_texts_2026-06-12",
+    "knowledge_graph": "final_reproducibility_release_2026-07-29",
+    "quality": "manual_precision_recall_and_coreference_evaluation_2026"
+  },
+  "policies": {
+    "runtime_tables_are_read_only": true,
+    "source_identifiers_are_metadata_only": true,
+    "article_files_contain_body_only": true,
+    "combined_book_files_are_not_duplicated": true,
+    "generated_indexes_and_chunks_belong_in_data_derived": true
+  },
+  "schema": "../../config/data_schema.json",
+  "counts": {
+    "documents": 20020,
+    "books": 105,
+    "entities": 25560,
+    "aliases": 43632,
+    "relation_types": 153,
+    "relations": 2748,
+    "relation_evidence": 3514,
+    "claims": 4250,
+    "claim_relations": 3960,
+    "claim_evidence": 4437,
+    "graph_metrics": 1,
+    "entity_metrics": 1784,
+    "view_metrics": 5
+  },
+  "validation": {
+    "passed": true,
+    "table_rows": {
+      "documents": 20020,
+      "books": 105,
+      "entities": 25560,
+      "aliases": 43632,
+      "relation_types": 153,
+      "relations": 2748,
+      "relation_evidence": 3514,
+      "claims": 4250,
+      "claim_relations": 3960,
+      "claim_evidence": 4437,
+      "graph_metrics": 1,
+      "entity_metrics": 1784,
+      "view_metrics": 5
+    },
+    "article_files": 20020,
+    "runtime_file_count": 20035
+  }
+}

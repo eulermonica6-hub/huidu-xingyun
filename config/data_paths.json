@@ -1,0 +1,97 @@
+{
+  "schema_version": 2,
+  "path_base": "project_root",
+  "source_policy": "read_only",
+  "workspace_root": "../..",
+  "runtime_data": {
+    "root": "data/package",
+    "schema": "config/data_schema.json",
+    "dataset_metadata": "data/package/metadata/dataset.json",
+    "documents": "data/package/corpus/documents.jsonl",
+    "books": "data/package/corpus/books.csv",
+    "article_text_root": "data/package/corpus/articles",
+    "entities": "data/package/graph/entities.csv",
+    "aliases": "data/package/graph/aliases.csv",
+    "relation_types": "data/package/graph/relation_types.csv",
+    "relations": "data/package/graph/relations.csv",
+    "relation_evidence": "data/package/graph/relation_evidence.csv",
+    "claims": "data/package/graph/claims.csv",
+    "claim_relations": "data/package/graph/claim_relations.csv",
+    "claim_evidence": "data/package/graph/claim_evidence.csv",
+    "graph_metrics": "data/package/analytics/graph_metrics.csv",
+    "entity_metrics": "data/package/analytics/entity_metrics.csv",
+    "view_metrics": "data/package/analytics/view_metrics.csv",
+    "quality_metrics": "data/package/quality/quality_metrics.json"
+  },
+  "corpus": {
+    "release_name": "hsingyun_texts_2026-06-12",
+    "data_root": "../../数据",
+    "root": "../../数据/hsingyun_texts",
+    "manifest": "../../数据/hsingyun_texts/manifest.jsonl",
+    "manifest_text_file_base": "../../数据",
+    "article_text_root": "../../数据/hsingyun_texts/texts",
+    "combined_book_root": "../../数据/hsingyun_texts/books",
+    "catalog": "../../数据/hsingyun_texts/catalog_books.json",
+    "expected": {
+      "manifest_rows": 20020,
+      "unique_article_ids": 20020,
+      "article_text_files": 20020,
+      "combined_book_files": 105,
+      "categories": 13,
+      "books": 105
+    }
+  },
+  "knowledge_graph": {
+    "release_stage": "Stage265",
+    "database_stage": "Stage266",
+    "root": "../../formal_experiment/273_final_reproducibility_release/data",
+    "entity_registry": "../../formal_experiment/273_final_reproducibility_release/data/stage265_entity_registry.csv",
+    "entity_alias_registry": "../../formal_experiment/273_final_reproducibility_release/data/stage265_entity_alias_registry.csv",
+    "relation_registry": "../../formal_experiment/273_final_reproducibility_release/data/stage265_relation_registry.csv",
+    "stable_relations": "../../formal_experiment/273_final_reproducibility_release/data/stage265_stable_relations.csv",
+    "stable_evidence": "../../formal_experiment/273_final_reproducibility_release/data/stage265_stable_relation_evidence.csv",
+    "claim_nodes": "../../formal_experiment/273_final_reproducibility_release/data/stage265_claim_nodes.csv",
+    "claim_relations": "../../formal_experiment/273_final_reproducibility_release/data/stage265_claim_relations.csv",
+    "claim_evidence": "../../formal_experiment/273_final_reproducibility_release/data/stage265_claim_evidence.csv",
+    "release_summary": "../../formal_experiment/273_final_reproducibility_release/data/stage265_release_summary.json",
+    "quality_gate": "../../formal_experiment/273_final_reproducibility_release/data/stage265_quality_gate.json"
+  },
+  "neo4j": {
+    "connection_source": "environment_only",
+    "uri_env": "NEO4J_URI",
+    "username_env": "NEO4J_USERNAME",
+    "password_env": "NEO4J_PASSWORD",
+    "database_env": "NEO4J_DATABASE",
+    "default_uri": "bolt://localhost:7687",
+    "runtime_root": "../../neo4j_runtime/deployment",
+    "import_script": "../../formal_experiment/273_final_reproducibility_release/neo4j/stage266_import.cypher",
+    "validation_script": "../../formal_experiment/273_final_reproducibility_release/neo4j/stage266_validation.cypher",
+    "validation_result": "../../formal_experiment/273_final_reproducibility_release/neo4j/stage266_database_validation_result.json",
+    "sensitive_connection_file": "../../neo4j_runtime/deployment/connection.txt"
+  },
+  "analysis": {
+    "global_metrics": "../../formal_experiment/273_final_reproducibility_release/analysis/stage267_global_graph_metrics.csv",
+    "node_metrics": "../../formal_experiment/273_final_reproducibility_release/analysis/stage267_global_node_metrics.csv",
+    "view_metrics": "../../formal_experiment/273_final_reproducibility_release/analysis/stage267_view_graph_metrics.csv",
+    "four_view_report": "../../formal_experiment/273_final_reproducibility_release/analysis/Stage268_四专题综合论证报告.md"
+  },
+  "evaluation": {
+    "precision_report": "../../formal_experiment/278_manual_evaluation_metrics/Stage278_人工标注指标计算与论文采用建议.md",
+    "precision_summary": "../../formal_experiment/278_manual_evaluation_metrics/stage278_manual_evaluation_summary.json",
+    "recall_report": "../../formal_experiment/279_recall_gold_repair_and_formal_evaluation/Stage279_召回率正式评价与论文表述建议.md",
+    "recall_metrics": "../../formal_experiment/279_recall_gold_repair_and_formal_evaluation/stage279_recall_metrics.json",
+    "coreference_report": "../../formal_experiment/289_master_coreference_sensitivity/Stage289_大師与星雲大師指代敏感性分析.md",
+    "coreference_summary": "../../formal_experiment/289_master_coreference_sensitivity/stage289_summary.json"
+  },
+  "derived": {
+    "root": "data/derived",
+    "document_chunks": "data/derived/document_chunks",
+    "vector_metadata": "data/derived/vector_metadata",
+    "demo_subgraph": "data/derived/demo_subgraph",
+    "evaluation_sets": "data/derived/evaluation_sets",
+    "cache": "runtime/cache",
+    "indexes": "runtime/indexes",
+    "logs": "runtime/logs",
+    "outputs": "outputs"
+  }
+}

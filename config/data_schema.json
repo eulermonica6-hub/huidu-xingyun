@@ -1,0 +1,311 @@
+{
+  "schema_version": 1,
+  "naming": {
+    "field_style": "lower_snake_case",
+    "text_encoding": "utf-8",
+    "csv_boolean": ["true", "false"],
+    "multi_value_separator": ";",
+    "null_value": "",
+    "runtime_id_patterns": {
+      "document_id": "^doc_[0-9]{8}$",
+      "book_id": "^book_[0-9]{3}$",
+      "entity_id": "^ent_[0-9a-f]{12}$",
+      "relation_id": "^rel_[0-9a-f]{12}$",
+      "evidence_id": "^ev_[0-9a-f]{12}$",
+      "claim_id": "^claim_[0-9a-f]{12}$",
+      "claim_relation_id": "^crel_[0-9a-f]{12}$",
+      "claim_evidence_id": "^cev_[0-9a-f]{12}$",
+      "paragraph_id": "^par_[0-9]{8}_[0-9]{4}$",
+      "sentence_id": "^sent_[0-9]{8}_[0-9]{4}_[0-9]{3}$"
+    }
+  },
+  "tables": {
+    "documents": {
+      "path": "corpus/documents.jsonl",
+      "format": "jsonl",
+      "primary_key": ["document_id"],
+      "fields": [
+        {"name": "document_id", "type": "string", "required": true, "description": "文章稳定编号"},
+        {"name": "title", "type": "string", "required": true, "description": "文章标题"},
+        {"name": "category", "type": "string", "required": true, "description": "全集分类"},
+        {"name": "book_id", "type": "string", "required": true, "description": "书目稳定编号"},
+        {"name": "book_title", "type": "string", "required": true, "description": "书目标题"},
+        {"name": "breadcrumbs", "type": "string_array", "required": true, "description": "原站层级路径"},
+        {"name": "char_count", "type": "integer", "required": true, "description": "清洗后正文字符数"},
+        {"name": "source_url", "type": "string", "required": true, "description": "原文网页"},
+        {"name": "text_path", "type": "string", "required": true, "description": "相对数据包根目录的正文路径"}
+      ]
+    },
+    "books": {
+      "path": "corpus/books.csv",
+      "format": "csv",
+      "primary_key": ["book_id"],
+      "fields": [
+        {"name": "book_id", "type": "string", "required": true, "description": "书目稳定编号"},
+        {"name": "title", "type": "string", "required": true, "description": "书目标题"},
+        {"name": "category", "type": "string", "required": true, "description": "全集分类"},
+        {"name": "document_count", "type": "integer", "required": true, "description": "文章数"},
+        {"name": "char_count", "type": "integer", "required": true, "description": "清洗后正文总字符数"}
+      ]
+    },
+    "entities": {
+      "path": "graph/entities.csv",
+      "format": "csv",
+      "primary_key": ["entity_id"],
+      "fields": [
+        {"name": "entity_id", "type": "string", "required": true, "description": "实体稳定编号"},
+        {"name": "name", "type": "string", "required": true, "description": "首选名称"},
+        {"name": "entity_type", "type": "string", "required": true, "description": "实体类型"},
+        {"name": "node_class", "type": "string", "required": true, "description": "图节点类别"},
+        {"name": "mention_count", "type": "integer", "required": true, "description": "语料出现次数"},
+        {"name": "document_count", "type": "integer", "required": true, "description": "涉及文章数"},
+        {"name": "in_relation_graph", "type": "boolean", "required": true, "description": "是否进入稳定关系图"},
+        {"name": "in_claim_graph", "type": "boolean", "required": true, "description": "是否进入语境命题图"},
+        {"name": "analytics_enabled", "type": "boolean", "required": true, "description": "是否可进入网络指标计算"}
+      ]
+    },
+    "aliases": {
+      "path": "graph/aliases.csv",
+      "format": "csv",
+      "primary_key": ["alias", "entity_id"],
+      "foreign_keys": [{"fields": ["entity_id"], "references": "entities.entity_id"}],
+      "fields": [
+        {"name": "alias", "type": "string", "required": true, "description": "原始别名"},
+        {"name": "normalized_alias", "type": "string", "required": true, "description": "规范化别名"},
+        {"name": "entity_id", "type": "string", "required": true, "description": "对应实体编号"},
+        {"name": "ambiguity_count", "type": "integer", "required": true, "description": "同一规范化别名对应实体数"},
+        {"name": "resolution_status", "type": "string", "required": true, "description": "别名解析状态"}
+      ]
+    },
+    "relation_types": {
+      "path": "graph/relation_types.csv",
+      "format": "csv",
+      "primary_key": ["relation_type"],
+      "fields": [
+        {"name": "relation_type", "type": "string", "required": true, "description": "关系类型键"},
+        {"name": "label", "type": "string", "required": true, "description": "关系中文名"},
+        {"name": "definition", "type": "string", "required": true, "description": "语义定义"},
+        {"name": "source_types", "type": "string", "required": true, "description": "允许的源实体类型"},
+        {"name": "target_types", "type": "string", "required": true, "description": "允许的目标实体类型"},
+        {"name": "direction", "type": "string", "required": true, "description": "directed或undirected"},
+        {"name": "projection", "type": "string", "required": true, "description": "图投影范围"},
+        {"name": "analytics_policy", "type": "string", "required": true, "description": "网络分析规则"},
+        {"name": "status", "type": "string", "required": true, "description": "注册状态"}
+      ]
+    },
+    "relations": {
+      "path": "graph/relations.csv",
+      "format": "csv",
+      "primary_key": ["relation_id"],
+      "foreign_keys": [
+        {"fields": ["source_id"], "references": "entities.entity_id"},
+        {"fields": ["target_id"], "references": "entities.entity_id"},
+        {"fields": ["relation_type"], "references": "relation_types.relation_type"}
+      ],
+      "fields": [
+        {"name": "relation_id", "type": "string", "required": true, "description": "稳定关系编号"},
+        {"name": "source_id", "type": "string", "required": true, "description": "源实体编号"},
+        {"name": "source_name", "type": "string", "required": true, "description": "源实体名称快照"},
+        {"name": "source_type", "type": "string", "required": true, "description": "源实体类型快照"},
+        {"name": "relation_type", "type": "string", "required": true, "description": "关系类型"},
+        {"name": "relation_label", "type": "string", "required": true, "description": "关系中文名"},
+        {"name": "target_id", "type": "string", "required": true, "description": "目标实体编号"},
+        {"name": "target_name", "type": "string", "required": true, "description": "目标实体名称快照"},
+        {"name": "target_type", "type": "string", "required": true, "description": "目标实体类型快照"},
+        {"name": "direction", "type": "string", "required": true, "description": "关系方向"},
+        {"name": "usage", "type": "string", "required": true, "description": "使用许可"},
+        {"name": "layer", "type": "string", "required": true, "description": "图层"},
+        {"name": "analytics_enabled", "type": "boolean", "required": true, "description": "是否进入网络指标计算"},
+        {"name": "mention_count", "type": "integer", "required": true, "description": "关系出现次数"},
+        {"name": "document_count", "type": "integer", "required": true, "description": "涉及文章数"},
+        {"name": "paragraph_count", "type": "integer", "required": true, "description": "涉及段落数"},
+        {"name": "category_count", "type": "integer", "required": true, "description": "涉及分类数"},
+        {"name": "evidence_count", "type": "integer", "required": true, "description": "证据记录数"},
+        {"name": "evidence_strength", "type": "string", "required": true, "description": "证据强度"},
+        {"name": "example_text", "type": "string", "required": false, "description": "示例原文"},
+        {"name": "example_url", "type": "string", "required": false, "description": "示例网页"}
+      ]
+    },
+    "relation_evidence": {
+      "path": "graph/relation_evidence.csv",
+      "format": "csv",
+      "primary_key": ["evidence_id"],
+      "foreign_keys": [
+        {"fields": ["relation_id"], "references": "relations.relation_id"},
+        {"fields": ["document_id"], "references": "documents.document_id"}
+      ],
+      "fields": [
+        {"name": "evidence_id", "type": "string", "required": true, "description": "关系证据编号"},
+        {"name": "relation_id", "type": "string", "required": true, "description": "稳定关系编号"},
+        {"name": "document_id", "type": "string", "required": true, "description": "文章编号"},
+        {"name": "paragraph_id", "type": "string", "required": false, "description": "段落编号"},
+        {"name": "sentence_ids", "type": "string", "required": false, "description": "分号分隔的句子编号"},
+        {"name": "category", "type": "string", "required": true, "description": "全集分类"},
+        {"name": "source_url", "type": "string", "required": true, "description": "原文网页"},
+        {"name": "text", "type": "string", "required": true, "description": "证据原文"},
+        {"name": "support_count", "type": "integer", "required": true, "description": "支持次数"},
+        {"name": "review_status", "type": "string", "required": true, "description": "复核状态"}
+      ]
+    },
+    "claims": {
+      "path": "graph/claims.csv",
+      "format": "csv",
+      "primary_key": ["claim_id"],
+      "foreign_keys": [{"fields": ["document_id"], "references": "documents.document_id"}],
+      "fields": [
+        {"name": "claim_id", "type": "string", "required": true, "description": "语境命题编号"},
+        {"name": "text", "type": "string", "required": true, "description": "语境命题文本"},
+        {"name": "claim_type", "type": "string", "required": true, "description": "语境命题类型"},
+        {"name": "node_class", "type": "string", "required": true, "description": "图节点类别"},
+        {"name": "semantic_role", "type": "string", "required": true, "description": "语义角色"},
+        {"name": "document_id", "type": "string", "required": true, "description": "首次出现文章"},
+        {"name": "paragraph_id", "type": "string", "required": false, "description": "首次出现段落"},
+        {"name": "sentence_ids", "type": "string", "required": false, "description": "首次出现句子"},
+        {"name": "category", "type": "string", "required": true, "description": "全集分类"},
+        {"name": "source_url", "type": "string", "required": true, "description": "首次出现网页"},
+        {"name": "evidence_count", "type": "integer", "required": true, "description": "证据出现次数"}
+      ]
+    },
+    "claim_relations": {
+      "path": "graph/claim_relations.csv",
+      "format": "csv",
+      "primary_key": ["claim_relation_id"],
+      "fields": [
+        {"name": "claim_relation_id", "type": "string", "required": true, "description": "语境关系编号"},
+        {"name": "source_id", "type": "string", "required": true, "description": "源实体或语境命题编号"},
+        {"name": "source_name", "type": "string", "required": true, "description": "源节点名称快照"},
+        {"name": "source_type", "type": "string", "required": true, "description": "源节点类型快照"},
+        {"name": "relation_type", "type": "string", "required": true, "description": "关系类型"},
+        {"name": "relation_label", "type": "string", "required": true, "description": "关系中文名"},
+        {"name": "target_id", "type": "string", "required": true, "description": "目标实体或语境命题编号"},
+        {"name": "target_name", "type": "string", "required": true, "description": "目标节点名称快照"},
+        {"name": "target_type", "type": "string", "required": true, "description": "目标节点类型快照"},
+        {"name": "usage", "type": "string", "required": true, "description": "使用许可"},
+        {"name": "layer", "type": "string", "required": true, "description": "图层"},
+        {"name": "mention_count", "type": "integer", "required": true, "description": "关系出现次数"},
+        {"name": "document_count", "type": "integer", "required": true, "description": "涉及文章数"},
+        {"name": "paragraph_count", "type": "integer", "required": true, "description": "涉及段落数"},
+        {"name": "sentence_count", "type": "integer", "required": true, "description": "涉及句子数"},
+        {"name": "category_count", "type": "integer", "required": true, "description": "涉及分类数"},
+        {"name": "evidence_count", "type": "integer", "required": true, "description": "证据记录数"},
+        {"name": "example_text", "type": "string", "required": false, "description": "示例原文"},
+        {"name": "example_url", "type": "string", "required": false, "description": "示例网页"}
+      ]
+    },
+    "claim_evidence": {
+      "path": "graph/claim_evidence.csv",
+      "format": "csv",
+      "primary_key": ["claim_evidence_id"],
+      "foreign_keys": [
+        {"fields": ["claim_id"], "references": "claims.claim_id"},
+        {"fields": ["document_id"], "references": "documents.document_id"}
+      ],
+      "fields": [
+        {"name": "claim_evidence_id", "type": "string", "required": true, "description": "语境命题证据编号"},
+        {"name": "claim_id", "type": "string", "required": true, "description": "语境命题编号"},
+        {"name": "claim_relation_ids", "type": "string", "required": false, "description": "分号分隔的语境关系编号"},
+        {"name": "document_id", "type": "string", "required": true, "description": "文章编号"},
+        {"name": "paragraph_id", "type": "string", "required": false, "description": "段落编号"},
+        {"name": "sentence_ids", "type": "string", "required": false, "description": "分号分隔的句子编号"},
+        {"name": "category", "type": "string", "required": true, "description": "全集分类"},
+        {"name": "source_url", "type": "string", "required": true, "description": "原文网页"},
+        {"name": "text", "type": "string", "required": true, "description": "证据原文"},
+        {"name": "support_count", "type": "integer", "required": true, "description": "支持次数"}
+      ]
+    },
+    "graph_metrics": {
+      "path": "analytics/graph_metrics.csv",
+      "format": "csv",
+      "primary_key": ["graph_id"],
+      "fields": [
+        {"name": "graph_id", "type": "string", "required": true, "description": "图编号"},
+        {"name": "relation_count", "type": "integer", "required": true, "description": "关系记录数"},
+        {"name": "node_count", "type": "integer", "required": true, "description": "节点数"},
+        {"name": "directed_pair_count", "type": "integer", "required": true, "description": "有向节点对数"},
+        {"name": "undirected_pair_count", "type": "integer", "required": true, "description": "无向节点对数"},
+        {"name": "self_loop_count", "type": "integer", "required": true, "description": "自环数"},
+        {"name": "component_count", "type": "integer", "required": true, "description": "连通分量数"},
+        {"name": "largest_component_nodes", "type": "integer", "required": true, "description": "最大连通分量节点数"},
+        {"name": "largest_component_share", "type": "number", "required": true, "description": "最大连通分量占比"},
+        {"name": "density", "type": "number", "required": true, "description": "无向图密度"},
+        {"name": "mean_degree", "type": "number", "required": true, "description": "平均度"},
+        {"name": "reciprocity", "type": "number", "required": true, "description": "互惠性"},
+        {"name": "transitivity", "type": "number", "required": true, "description": "传递性"},
+        {"name": "average_clustering", "type": "number", "required": true, "description": "平均聚类系数"},
+        {"name": "degree_assortativity", "type": "number", "required": true, "description": "度同配性"},
+        {"name": "community_count", "type": "integer", "required": true, "description": "社群数"},
+        {"name": "modularity", "type": "number", "required": true, "description": "模块度"},
+        {"name": "max_core_number", "type": "integer", "required": true, "description": "最大核数"},
+        {"name": "estimated_diameter", "type": "integer", "required": true, "description": "估计直径"},
+        {"name": "estimated_mean_shortest_path", "type": "number", "required": true, "description": "估计平均最短路径"}
+      ]
+    },
+    "entity_metrics": {
+      "path": "analytics/entity_metrics.csv",
+      "format": "csv",
+      "primary_key": ["entity_id"],
+      "foreign_keys": [{"fields": ["entity_id"], "references": "entities.entity_id"}],
+      "fields": [
+        {"name": "entity_id", "type": "string", "required": true, "description": "实体编号"},
+        {"name": "name", "type": "string", "required": true, "description": "实体名称"},
+        {"name": "entity_type", "type": "string", "required": true, "description": "实体类型"},
+        {"name": "mention_count", "type": "integer", "required": true, "description": "语料出现次数"},
+        {"name": "document_count", "type": "integer", "required": true, "description": "涉及文章数"},
+        {"name": "out_degree", "type": "integer", "required": true, "description": "出度"},
+        {"name": "in_degree", "type": "integer", "required": true, "description": "入度"},
+        {"name": "degree", "type": "integer", "required": true, "description": "无向度"},
+        {"name": "relation_count", "type": "integer", "required": true, "description": "关联关系记录数"},
+        {"name": "weighted_degree", "type": "number", "required": true, "description": "按文章支持数加权的度"},
+        {"name": "evidence_count", "type": "integer", "required": true, "description": "关联证据数"},
+        {"name": "pagerank", "type": "number", "required": true, "description": "PageRank"},
+        {"name": "betweenness", "type": "number", "required": true, "description": "介数中心性"},
+        {"name": "harmonic_centrality", "type": "number", "required": true, "description": "调和中心性"},
+        {"name": "core_number", "type": "integer", "required": true, "description": "核数"},
+        {"name": "community_id", "type": "integer", "required": true, "description": "社群编号"},
+        {"name": "community_size", "type": "integer", "required": true, "description": "社群规模"},
+        {"name": "participation_coefficient", "type": "number", "required": true, "description": "参与系数"},
+        {"name": "relation_family_count", "type": "integer", "required": true, "description": "关系族数量"},
+        {"name": "view_count", "type": "integer", "required": true, "description": "涉及专题视图数"},
+        {"name": "views", "type": "string", "required": false, "description": "分号分隔的专题视图"},
+        {"name": "neighbor_type_entropy", "type": "number", "required": true, "description": "邻居类型熵"},
+        {"name": "relation_rate", "type": "number", "required": false, "description": "每百次出现的关系数"},
+        {"name": "pagerank_percentile", "type": "number", "required": true, "description": "PageRank百分位"},
+        {"name": "betweenness_percentile", "type": "number", "required": true, "description": "介数百分位"},
+        {"name": "participation_percentile", "type": "number", "required": true, "description": "参与系数百分位"},
+        {"name": "bridge_score", "type": "number", "required": true, "description": "桥接得分"},
+        {"name": "degree_rank", "type": "integer", "required": true, "description": "度排名"},
+        {"name": "pagerank_rank", "type": "integer", "required": true, "description": "PageRank排名"},
+        {"name": "betweenness_rank", "type": "integer", "required": true, "description": "介数排名"},
+        {"name": "bridge_rank", "type": "integer", "required": true, "description": "桥接排名"}
+      ]
+    },
+    "view_metrics": {
+      "path": "analytics/view_metrics.csv",
+      "format": "csv",
+      "primary_key": ["view_id"],
+      "fields": [
+        {"name": "view_id", "type": "string", "required": true, "description": "专题视图编号"},
+        {"name": "view_label", "type": "string", "required": true, "description": "专题视图中文名"},
+        {"name": "relation_count", "type": "integer", "required": true, "description": "关系记录数"},
+        {"name": "node_count", "type": "integer", "required": true, "description": "节点数"},
+        {"name": "directed_pair_count", "type": "integer", "required": true, "description": "有向节点对数"},
+        {"name": "undirected_pair_count", "type": "integer", "required": true, "description": "无向节点对数"},
+        {"name": "self_loop_count", "type": "integer", "required": true, "description": "自环数"},
+        {"name": "component_count", "type": "integer", "required": true, "description": "连通分量数"},
+        {"name": "largest_component_nodes", "type": "integer", "required": true, "description": "最大连通分量节点数"},
+        {"name": "largest_component_share", "type": "number", "required": true, "description": "最大连通分量占比"},
+        {"name": "density", "type": "number", "required": true, "description": "无向图密度"},
+        {"name": "mean_degree", "type": "number", "required": true, "description": "平均度"},
+        {"name": "reciprocity", "type": "number", "required": true, "description": "互惠性"},
+        {"name": "transitivity", "type": "number", "required": true, "description": "传递性"},
+        {"name": "average_clustering", "type": "number", "required": true, "description": "平均聚类系数"},
+        {"name": "degree_assortativity", "type": "number", "required": true, "description": "度同配性"},
+        {"name": "community_count", "type": "integer", "required": true, "description": "社群数"},
+        {"name": "modularity", "type": "number", "required": true, "description": "模块度"},
+        {"name": "max_core_number", "type": "integer", "required": true, "description": "最大核数"},
+        {"name": "estimated_diameter", "type": "integer", "required": true, "description": "估计直径"},
+        {"name": "estimated_mean_shortest_path", "type": "number", "required": true, "description": "估计平均最短路径"}
+      ]
+    }
+  }
+}

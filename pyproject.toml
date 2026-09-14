@@ -1,0 +1,39 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "huidu-xingyun"
+version = "0.1.0"
+description = "慧读星云：基于AI知识图谱的《星云大师全集》人间佛教智能研析与知识服务平台"
+readme = "README.md"
+requires-python = ">=3.11,<3.14"
+dependencies = [
+  "langchain>=1.2,<2.0",
+  "langgraph>=1.0,<2.0",
+  "langchain-deepseek",
+  "langchain-groq",
+  "langchain-nvidia-ai-endpoints",
+  "langchain-openai",
+  "numpy>=1.26",
+  "sentence-transformers>=3.0",
+  "neo4j>=5.18",
+  "neo4j-graphrag",
+  "pydantic>=2.0,<3.0",
+  "pydantic-settings>=2.0,<3.0",
+]
+
+[project.optional-dependencies]
+api = ["fastapi", "uvicorn[standard]"]
+dev = ["pytest", "pytest-asyncio", "ruff"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/huidu_xingyun"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

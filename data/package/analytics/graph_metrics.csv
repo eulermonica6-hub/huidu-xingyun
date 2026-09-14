@@ -1,0 +1,2 @@
+graph_id,relation_count,node_count,directed_pair_count,undirected_pair_count,self_loop_count,component_count,largest_component_nodes,largest_component_share,density,mean_degree,reciprocity,transitivity,average_clustering,degree_assortativity,community_count,modularity,max_core_number,estimated_diameter,estimated_mean_shortest_path
+stable_graph,2745,1784,2595,2521,0,230,1279,0.7169282511210763,0.0015850999348606294,2.8262331838565022,0.057032755298651254,0.047218394139406684,0.04074683909608345,-0.0924782515803325,261,0.6717918355014899,6,12,4.306851330203443

@@ -1,0 +1,25 @@
+{
+  "generated_at": "2026-09-07T14:25:34+08:00",
+  "passed": true,
+  "counts": {
+    "documents": 20020,
+    "books": 105,
+    "entities": 25560,
+    "aliases": 43632,
+    "relation_types": 153,
+    "relations": 2748,
+    "relation_evidence": 3514,
+    "claims": 4250,
+    "claim_relations": 3960,
+    "claim_evidence": 4437,
+    "graph_metrics": 1,
+    "entity_metrics": 1784,
+    "view_metrics": 5
+  },
+  "article_files": 20020,
+  "notes": [
+    "The build copies source data and never changes the source files.",
+    "Runtime identifiers are deterministic hashes; source identifiers remain in metadata maps.",
+    "Article filenames contain only document IDs and article files contain body text only."
+  ]
+}

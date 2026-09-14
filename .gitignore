@@ -1,0 +1,35 @@
+# === 密钥与本地配置（外部密钥文件在仓库外 ../LLM api key.txt，绝不入工程）===
+.env
+.env.local
+.env.*.local
+*api key*.txt
+*apikey*.txt
+
+# === Python ===
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+
+# === 大体积数据（正文与向量索引不入仓，另附压缩包；见 data/README.md、docs/09）===
+data/package/corpus/articles/
+data/derived/
+
+# === 运行产物 ===
+runtime/
+outputs/*
+!outputs/README.md
+
+# === OS / IDE ===
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

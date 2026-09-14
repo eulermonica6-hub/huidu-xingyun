@@ -1,0 +1,317 @@
+{
+  "relation_precision": {
+    "raw_sample_n": 500,
+    "raw_accept_n": 471,
+    "raw_accept_rate": 0.942,
+    "annotation_conflict_n": 1,
+    "qc_sample_n": 499,
+    "strict_correct_n": 470,
+    "strict_precision": 0.9418837675350702,
+    "strict_precision_wilson95_descriptive": [
+      0.9177818625084386,
+      0.9592341278481843
+    ],
+    "semantic_supported_n": 481,
+    "semantic_support_rate": 0.9639278557114228,
+    "semantic_support_wilson95_descriptive": [
+      0.9437045307726428,
+      0.9770628241822694
+    ],
+    "failed_as_is_n": 29,
+    "failed_error_type_counts": {
+      "relation_type": 17,
+      "entity_boundary": 8,
+      "direction": 3,
+      "should_be_claim": 1
+    },
+    "metric_note": "Primary values are observed pass rates in a coverage-oriented stratified sample, not probability-sample estimates of the entire graph. Semantic support is reconstructed from the compact review fields: boundary and direction corrections retain the relation family, while relation-type errors and Claim redirection do not."
+  },
+  "claim_faithfulness": {
+    "raw_sample_n": 250,
+    "annotation_conflict_n": 0,
+    "qc_sample_n": 250,
+    "faithful_as_is_n": 223,
+    "faithfulness_rate": 0.892,
+    "faithfulness_wilson95_descriptive": [
+      0.8474274415961268,
+      0.9247080515994447
+    ],
+    "correction_proposed_n": 27,
+    "failed_as_is_n": 27,
+    "failed_error_type_counts": {
+      "entity_type": 11,
+      "relation_type": 8,
+      "claim_incomplete": 5,
+      "not_a_claim": 2,
+      "missing_scope": 1
+    },
+    "metric_note": "Faithfulness means the current Claim preserves actor, condition, scope, negation and modality without revision. A proposed correction is not counted as an original correct result."
+  },
+  "recall": {
+    "evaluation_population": {
+      "eligible_paragraph_population_n": 189329,
+      "sample_paragraph_n": 240,
+      "relation_bearing_paragraph_n": 236,
+      "gold_stable_relation_n": 579,
+      "gold_claim_n": 322,
+      "new_relation_proposal_n": 24
+    },
+    "stable_strict_recall": {
+      "unweighted_sample_rate": 0.0034542314335060447,
+      "design_weighted_rate": 0.007295229085166161,
+      "stratified_bootstrap95": [
+        0.0,
+        0.021708929903006085
+      ],
+      "matched_n_unweighted": 2,
+      "gold_n_unweighted": 579
+    },
+    "stable_semantic_recall": {
+      "unweighted_sample_rate": 0.0069084628670120895,
+      "design_weighted_rate": 0.014590458170332322,
+      "stratified_bootstrap95": [
+        0.0,
+        0.04341785980601217
+      ],
+      "matched_n_unweighted": 4,
+      "gold_n_unweighted": 579
+    },
+    "claim_strict_recall": {
+      "unweighted_sample_rate": 0.0,
+      "design_weighted_rate": 0.0,
+      "stratified_bootstrap95": [
+        0.0,
+        0.0
+      ],
+      "matched_n_unweighted": 0,
+      "gold_n_unweighted": 322
+    },
+    "claim_semantic_recall": {
+      "unweighted_sample_rate": 0.003105590062111801,
+      "design_weighted_rate": 0.006984843269047269,
+      "stratified_bootstrap95": [
+        0.0,
+        0.02172567346023596
+      ],
+      "matched_n_unweighted": 1,
+      "gold_n_unweighted": 322
+    },
+    "combined_strict_recall": {
+      "unweighted_sample_rate": 0.0022197558268590455,
+      "design_weighted_rate": 0.004792497903536687,
+      "stratified_bootstrap95": [
+        0.0,
+        0.014249426304170526
+      ],
+      "matched_n_unweighted": 2,
+      "gold_n_unweighted": 901
+    },
+    "combined_semantic_recall": {
+      "unweighted_sample_rate": 0.005549389567147614,
+      "design_weighted_rate": 0.011981244758841719,
+      "stratified_bootstrap95": [
+        0.0,
+        0.03562356576042631
+      ],
+      "matched_n_unweighted": 5,
+      "gold_n_unweighted": 901
+    },
+    "paragraph_strict_recall": {
+      "unweighted_sample_rate": 0.00423728813559322,
+      "design_weighted_rate": 0.010214184757971425,
+      "stratified_bootstrap95": [
+        0.0,
+        0.030871438622357764
+      ],
+      "matched_n_unweighted": 1,
+      "gold_n_unweighted": 236
+    },
+    "paragraph_semantic_recall": {
+      "unweighted_sample_rate": 0.00423728813559322,
+      "design_weighted_rate": 0.010214184757971425,
+      "stratified_bootstrap95": [
+        0.0,
+        0.030871438622357764
+      ],
+      "matched_n_unweighted": 1,
+      "gold_n_unweighted": 236
+    },
+    "open_relation_omission_rate": {
+      "unweighted_sample_rate": 0.03980099502487562,
+      "design_weighted_rate": 0.03314988702307532,
+      "definition": "gold relation proposals not representable by the frozen 当前关系类型表 relation registry divided by all stable plus proposed stable relations"
+    },
+    "closed_ontology": {
+      "closed_stable_strict_recall": {
+        "matched_n_unweighted": 1,
+        "gold_n_unweighted": 59,
+        "unweighted_sample_rate": 0.01694915254237288,
+        "design_weighted_rate": 0.039922446231648825,
+        "stratified_bootstrap95": [
+          0.0,
+          0.12736969824401426
+        ]
+      },
+      "closed_stable_semantic_recall": {
+        "matched_n_unweighted": 2,
+        "gold_n_unweighted": 59,
+        "unweighted_sample_rate": 0.03389830508474576,
+        "design_weighted_rate": 0.07984489246329765,
+        "stratified_bootstrap95": [
+          0.0,
+          0.2547393964880285
+        ]
+      },
+      "closed_claim_strict_recall": {
+        "matched_n_unweighted": 0,
+        "gold_n_unweighted": 88,
+        "unweighted_sample_rate": 0.0,
+        "design_weighted_rate": 0.0,
+        "stratified_bootstrap95": [
+          0.0,
+          0.0
+        ]
+      },
+      "closed_claim_semantic_recall": {
+        "matched_n_unweighted": 1,
+        "gold_n_unweighted": 88,
+        "unweighted_sample_rate": 0.011363636363636364,
+        "design_weighted_rate": 0.024948021557804106,
+        "stratified_bootstrap95": [
+          0.0,
+          0.07403648972619394
+        ]
+      },
+      "closed_combined_strict_recall": {
+        "matched_n_unweighted": 1,
+        "gold_n_unweighted": 147,
+        "unweighted_sample_rate": 0.006802721088435374,
+        "design_weighted_rate": 0.015353458718073004,
+        "stratified_bootstrap95": [
+          0.0,
+          0.0445603434477531
+        ]
+      },
+      "closed_combined_semantic_recall": {
+        "matched_n_unweighted": 3,
+        "gold_n_unweighted": 147,
+        "unweighted_sample_rate": 0.02040816326530612,
+        "design_weighted_rate": 0.04606037615421901,
+        "stratified_bootstrap95": [
+          0.0,
+          0.1336810303432593
+        ]
+      },
+      "closed_paragraph_semantic_recall": {
+        "matched_n_unweighted": 1,
+        "gold_n_unweighted": 90,
+        "unweighted_sample_rate": 0.011111111111111112,
+        "design_weighted_rate": 0.026767515059898418,
+        "stratified_bootstrap95": [
+          0.0,
+          0.08175300600890482
+        ]
+      }
+    }
+  },
+  "coreference_sensitivity": {
+    "stable_relation_records": 2745,
+    "current_star_incident_evidence_records": 167,
+    "current_star_evidence_with_full_name": 149,
+    "current_star_evidence_with_title_but_no_full_name": 5,
+    "current_star_evidence_without_full_name_or_title": 13,
+    "claim_relations_with_master_title_as_endpoint": 1,
+    "claim_evidence_records_containing_master_title": 600,
+    "xingyun_incident_stable_relation_records": 127,
+    "xingyun_unique_stable_neighbors": 105,
+    "xingyun_unique_neighbor_type_counts": {
+      "Institution": 36,
+      "DoctrineTerm": 18,
+      "Concept": 16,
+      "PracticeActivity": 12,
+      "PlaceRealm": 12,
+      "Classic": 5,
+      "Group": 5,
+      "Work": 1
+    },
+    "mention_audit": {
+      "standalone_master_mentions": 50431,
+      "standalone_master_articles": 7037,
+      "standalone_master_paragraphs": 36416,
+      "standalone_master_categories": 10,
+      "classification_paragraph_counts": {
+        "unresolved_local_context": 20622,
+        "probable_article_context": 11803,
+        "confirmed_same_paragraph": 3052,
+        "other_or_ambiguous_person_context": 939
+      },
+      "classification_mention_counts": {
+        "confirmed_same_paragraph": 5323,
+        "other_or_ambiguous_person_context": 1456,
+        "probable_article_context": 17853,
+        "unresolved_local_context": 25799
+      }
+    },
+    "metric_scenarios": [
+      {
+        "scenario": "current_stable_graph",
+        "node_count": 1784,
+        "undirected_pair_count": 2521,
+        "master_degree": 105,
+        "master_degree_rank": 1,
+        "master_out_degree": 104,
+        "master_in_degree": 2,
+        "master_pagerank": 0.000633340236921379,
+        "master_pagerank_rank": 269,
+        "master_betweenness": 0.09755278714673199,
+        "master_betweenness_rank": 1
+      },
+      {
+        "scenario": "safe_named_identity_projection",
+        "node_count": 1764,
+        "undirected_pair_count": 2498,
+        "master_degree": 108,
+        "master_degree_rank": 1,
+        "master_out_degree": 107,
+        "master_in_degree": 2,
+        "master_pagerank": 0.0006406363808590905,
+        "master_pagerank_rank": 268,
+        "master_betweenness": 0.10233493152111471,
+        "master_betweenness_rank": 1
+      },
+      {
+        "scenario": "unsafe_global_title_merge",
+        "node_count": 1764,
+        "undirected_pair_count": 2498,
+        "master_degree": 108,
+        "master_degree_rank": 1,
+        "master_out_degree": 107,
+        "master_in_degree": 2,
+        "master_pagerank": 0.0006406363808590905,
+        "master_pagerank_rank": 268,
+        "master_betweenness": 0.10233493152111471,
+        "master_betweenness_rank": 1
+      },
+      {
+        "scenario": "add_title_resolution_edge_for_sensitivity_only",
+        "node_count": 1765,
+        "undirected_pair_count": 2499,
+        "master_degree": 109,
+        "master_degree_rank": 1,
+        "master_out_degree": 107,
+        "master_in_degree": 3,
+        "master_pagerank": 0.0008868461106890531,
+        "master_pagerank_rank": 176,
+        "master_betweenness": 0.10303757293946615,
+        "master_betweenness_rank": 1
+      }
+    ]
+  },
+  "release_gate": {
+    "passed": true,
+    "check_count": 22,
+    "passed_check_count": 22,
+    "errors": [],
+    "warnings": []
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "secret_source": "../LLM api key.txt",
+  "secret_policy": {
+    "explicit_label_required": true,
+    "accepted_labels": ["deepseek", "groq", "nvapi", "agnes", "zhipu", "ali"],
+    "ignore_unlabeled_lines": true,
+    "never_log_secret_values": true
+  },
+  "providers": {
+    "deepseek": {
+      "integration": "langchain_deepseek.ChatDeepSeek",
+      "api_key_env": "DEEPSEEK_API_KEY",
+      "default_model": "deepseek-chat",
+      "enabled": true,
+      "notes": "Use deepseek-chat for tool calling and structured output; do not use deepseek-reasoner as the router."
+    },
+    "groq": {
+      "integration": "langchain_groq.ChatGroq",
+      "api_key_env": "GROQ_API_KEY",
+      "default_model_env": "HUIDU_ROUTER_MODEL",
+      "enabled": true,
+      "notes": "Fast routing model. The concrete model ID must be verified by a live capability probe."
+    },
+    "nvapi": {
+      "integration": "langchain_nvidia_ai_endpoints.ChatNVIDIA",
+      "api_key_env": "NVIDIA_API_KEY",
+      "default_model_env": "HUIDU_FALLBACK_MODEL",
+      "enabled": true,
+      "notes": "Fallback provider. The concrete model ID must be verified by a live capability probe."
+    },
+    "zhipu": {
+      "integration": "langchain_openai.ChatOpenAI",
+      "api_key_env": "ZHIPU_API_KEY",
+      "default_model": "glm-4-flash",
+      "base_url": "https://open.bigmodel.cn/api/paas/v4/",
+      "enabled": true,
+      "notes": "OpenAI-compatible endpoint. Use prompt-driven JSON output; with_structured_output is unreliable for GLM."
+    },
+    "ali": {
+      "integration": "langchain_openai.ChatOpenAI",
+      "api_key_env": "DASHSCOPE_API_KEY",
+      "default_model": "qwen-plus",
+      "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      "enabled": true,
+      "notes": "Aliyun Bailian / DashScope OpenAI-compatible endpoint. Primary provider: route/verify use qwen-flash (fast), reasoner uses qwen-plus (quality). Use prompt-driven JSON output."
+    },
+    "agnes": {
+      "integration": "unresolved",
+      "api_key_env": "AGNES_API_KEY",
+      "enabled": false,
+      "notes": "Key label exists, but API base URL, model IDs and compatibility contract are not documented yet."
+    }
+  },
+  "roles": {
+    "intent_router": {
+      "provider": "ali",
+      "model_env": "HUIDU_ROUTER_MODEL",
+      "default_model": "qwen-flash",
+      "temperature": 0,
+      "cache": true,
+      "requires": ["json_output"]
+    },
+    "domain_reasoner": {
+      "provider": "ali",
+      "model": "qwen-plus",
+      "temperature": 0.1,
+      "cache": false,
+      "requires": ["json_output"]
+    },
+    "answer_verifier": {
+      "provider": "ali",
+      "model_env": "HUIDU_VERIFIER_MODEL",
+      "default_model": "qwen-flash",
+      "temperature": 0,
+      "cache": true,
+      "requires": ["json_output"]
+    },
+    "fallback": {
+      "provider": "zhipu",
+      "model_env": "HUIDU_FALLBACK_MODEL",
+      "default_model": "glm-4-flash",
+      "temperature": 0.1
+    }
+  }
+}
