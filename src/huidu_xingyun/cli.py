@@ -129,10 +129,12 @@ def main() -> int:
 
     ask = sub.add_parser("ask", help="单次问答")
     ask.add_argument("question", help="要提问的问题")
+    ask.add_argument("--no-llm", action="store_true", help="不调用大模型，仅用规则与离线占位回答")
     ask.add_argument("--export", action="store_true", help="把结果导出为 Markdown 证据包到 outputs/")
     ask.set_defaults(func=cmd_ask)
 
     repl = sub.add_parser("repl", help="交互式对话")
+    repl.add_argument("--no-llm", action="store_true", help="不调用大模型，仅用规则与离线占位回答")
     repl.set_defaults(func=cmd_repl)
 
     args = parser.parse_args()
