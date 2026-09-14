@@ -8,9 +8,9 @@
 
 用法（在项目根目录）：:
 
-    PYTHONPATH=src python scripts/build_vector_index.py
-    PYTHONPATH=src python scripts/build_vector_index.py --local-bge
-    PYTHONPATH=src python scripts/build_vector_index.py --validate-only
+    python scripts/build_vector_index.py
+    python scripts/build_vector_index.py --local-bge
+    python scripts/build_vector_index.py --validate-only
 """
 
 from __future__ import annotations
@@ -25,7 +25,7 @@ from pathlib import Path
 import numpy as np
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(PROJECT_ROOT / "src"))
+sys.path.insert(0, str(PROJECT_ROOT))
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")

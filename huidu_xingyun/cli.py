@@ -1,6 +1,6 @@
 """命令行入口：单次问答与简单 REPL。
 
-用法（在项目根目录，先 ``pip install -e .`` 或设置 ``PYTHONPATH=src``）：
+用法（在项目根目录直接运行，无需安装或 PYTHONPATH）：
 
     python -m huidu_xingyun.cli ask "星云大师在当前稳定图中连接了哪些机构？"
     python -m huidu_xingyun.cli ask --no-llm "什么是人间佛教"

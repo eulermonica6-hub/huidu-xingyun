@@ -208,3 +208,24 @@
 1. 端到端复测：路由 qwen-flash 后的延迟下降幅度与主备切换稳定性。
 2. 证据块截断（只喂 top-N 证据）进一步压低 reasoner 大证据场景延迟。
 3. 补充余额/密钥后再纳入 deepseek 或 groq 作为第二兜底。
+
+## 2026-09-14 仓库发布 + 扁平布局 + 操作指南
+
+### 已完成
+
+- 发布准备：私有 GitHub 仓库，`.gitignore` 排除 `.env`/正文 149MB/向量索引 79MB/运行产物；
+  仅小数据入仓（图谱 CSV + documents.jsonl + 元数据 ≈29MB）；密钥零泄露（三重扫描确认）。
+- 重写 README（含 Mermaid 架构图/状态流/模型路由）、新增 `docs/09_deployment_runbook.md`、
+  `docs/11_operation_guide.md`。
+- **包改为扁平布局**：`src/huidu_xingyun/` → `huidu_xingyun/`，`python -m huidu_xingyun.cli`
+  在项目根目录直接可用，不再需要 `PYTHONPATH=src` 或 `pip install`；同步修正
+  `settings.PROJECT_ROOT`（parents[3]→[2]）、`pyproject.toml`（hatch packages / pytest pythonpath）、
+  `scripts/*` 的 `sys.path`。
+- 修 CLI 参数位置：`--no-llm` 现可放在 `ask`/`repl` 子命令之后。
+- 证据块截断：`_format_evidence(items, limit=20)`，LLM 提示只喂前 20 条（A→B→C 优先），
+  完整证据仍进证据卡，缓解高连接度实体的生成延迟。
+
+### 验证结果
+
+- `python -m huidu_xingyun.cli ask "星云大师在哪些文章中谈到共生？"`（无任何环境变量）直接跑通。
+- `python -m pytest -q` 48 passed。

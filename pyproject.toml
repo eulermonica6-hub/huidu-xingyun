@@ -28,11 +28,11 @@ api = ["fastapi", "uvicorn[standard]"]
 dev = ["pytest", "pytest-asyncio", "ruff"]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/huidu_xingyun"]
+packages = ["huidu_xingyun"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["src"]
+pythonpath = ["."]
 
 [tool.ruff]
 line-length = 100

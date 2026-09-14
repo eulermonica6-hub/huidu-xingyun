@@ -114,32 +114,32 @@ copy .env.example .env
 #   把 API Key 按 label 写入 ../LLM api key.txt（ali / zhipu / ...）
 
 # 3. 基础校验（只读路径/数量/密钥标签，不打印任何密钥）
-PYTHONPATH=src python scripts/validate_foundation.py
+python scripts/validate_foundation.py
 
 # 4. 在线能力探测（锁定可用的路由/兜底模型）
-PYTHONPATH=src python scripts/probe_models.py --provider ali
+python scripts/probe_models.py --provider ali
 
 # 5. 单次问答 / 交互 / 离线（无 LLM）模式
-PYTHONPATH=src python -m huidu_xingyun.cli ask "星云大师在哪些文章中谈到共生？"
-PYTHONPATH=src python -m huidu_xingyun.cli repl
-PYTHONPATH=src python -m huidu_xingyun.cli ask --no-llm "什么是人間佛教"
-PYTHONPATH=src python -m huidu_xingyun.cli ask --export "星云大师在当前稳定图中连接了哪些机构？"
+python -m huidu_xingyun.cli ask "星云大师在哪些文章中谈到共生？"
+python -m huidu_xingyun.cli repl
+python -m huidu_xingyun.cli ask --no-llm "什么是人間佛教"
+python -m huidu_xingyun.cli ask --export "星云大师在当前稳定图中连接了哪些机构？"
 
 # 6. 语义检索索引（20,020 篇，DashScope 嵌入；--local-bge 可离线回退）
-PYTHONPATH=src python scripts/build_vector_index.py
+python scripts/build_vector_index.py
 
 # 7. 测试
-PYTHONPATH=src python -m pytest -q
+python -m pytest -q
 ```
 
-> 若本机 Python 环境非 ASCII 路径，`pip install -e .` 生成的 `.pth` 可能因编码出错；推荐直接 `PYTHONPATH=src` 运行，与上表一致。
+> 包采用扁平布局，直接在项目根目录运行 `python -m huidu_xingyun.cli …` 即可，无需 `pip install` 或 `PYTHONPATH`。若非要可安装打包，`pip install .`（非 editable）在中文路径下相对稳妥。
 
 ## 目录结构
 
 ```text
 huidu-xingyun/
 ├─ config/                数据路径(data_paths.json)、模型角色(models.example.json)、字段契约(data_schema.json)
-├─ src/huidu_xingyun/
+├─ huidu_xingyun/
 │  ├─ config/             Settings / RuntimePaths / SecretLoader
 │  ├─ schemas/           IntentResult / EvidenceItem / FinalResponse / AgentState ...
 │  ├─ repositories/      GraphRepository / CorpusRepository / VectorStore / Neo4jClient / embeddings
@@ -174,3 +174,4 @@ huidu-xingyun/
 8. `docs/07_portable_data_spec.md` — 数据包目录、编号与字段规则。
 9. `docs/09_deployment_runbook.md` — 安装、配置、运行与数据重建。
 10. `docs/10_competition_description.md` — 竞赛「作品建设说明书」草稿。
+11. `docs/11_operation_guide.md` — 用户操作指南（怎么提问、怎么读结果、四层证据）。

@@ -19,8 +19,8 @@ from dotenv import load_dotenv
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-# 项目根目录为 src/huidu_xingyun/config 向上三级。
-PROJECT_ROOT = Path(__file__).resolve().parents[3]
+# 项目根目录为 huidu_xingyun/config 向上两级。
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 CONFIG_DIR = PROJECT_ROOT / "config"
 
 # 无 .env 时不报错；密钥一律来自外部秘密文件，不由 .env 承载。

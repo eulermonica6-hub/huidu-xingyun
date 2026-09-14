@@ -13,7 +13,7 @@ pip install "langchain>=1.2,<2.0" "langgraph>=1.0,<2.0" langchain-openai langcha
     neo4j "pydantic>=2.0,<3.0" pydantic-settings "pytest" "pytest-asyncio"
 ```
 
-> 非 ASCII 路径环境避免 `pip install -e .`，直接 `PYTHONPATH=src` 运行（见下）。
+> 包为扁平布局，在项目根目录直接 `python -m huidu_xingyun.cli …` 或 `python scripts/…` 即可，无需安装、无需 `PYTHONPATH`。
 
 ## 2. 配置
 
@@ -49,9 +49,9 @@ zhipu: <zhipu-key>;
 ## 3. 校验与探测
 
 ```powershell
-PYTHONPATH=src python scripts/validate_foundation.py      # 路径/数量/字段/密钥标签
-PYTHONPATH=src python scripts/probe_models.py --provider ali    # 锁定可用模型
-PYTHONPATH=src python scripts/probe_models.py --provider zhipu  # 兜底能力
+python scripts/validate_foundation.py      # 路径/数量/字段/密钥标签
+python scripts/probe_models.py --provider ali    # 锁定可用模型
+python scripts/probe_models.py --provider zhipu  # 兜底能力
 ```
 
 探测通过 chat / JSON 意图 / 工具调用三项才算可进正式路由；报告写 `data/derived/model_probe_report.json`。
@@ -59,10 +59,10 @@ PYTHONPATH=src python scripts/probe_models.py --provider zhipu  # 兜底能力
 ## 4. 运行
 
 ```powershell
-PYTHONPATH=src python -m huidu_xingyun.cli ask "星云大师在哪些文章中谈到共生？"
-PYTHONPATH=src python -m huidu_xingyun.cli ask --no-llm "什么是人間佛教"   # 离线规则模式
-PYTHONPATH=src python -m huidu_xingyun.cli ask --export "慈悲与教育是什么关系？"
-PYTHONPATH=src python -m huidu_xingyun.cli repl                            # 多轮交互
+python -m huidu_xingyun.cli ask "星云大师在哪些文章中谈到共生？"
+python -m huidu_xingyun.cli ask --no-llm "什么是人間佛教"   # 离线规则模式
+python -m huidu_xingyun.cli ask --export "慈悲与教育是什么关系？"
+python -m huidu_xingyun.cli repl                            # 多轮交互
 ```
 
 `--export` 输出 Markdown 证据包到 `outputs/evidence_<trace>_<ts>.md`。审计日志在 `runtime/logs/audit.jsonl`（只记 provider/model/时延/重试/错误类型，无密钥）。
@@ -74,8 +74,8 @@ PYTHONPATH=src python -m huidu_xingyun.cli repl                            # 多
 仓库提交了图谱/元数据/文章清单；190MB 的 20,020 篇正文默认不入仓。从冻结源重建（需本机存在原始 `../../数据` 与 `../../formal_experiment`）：
 
 ```powershell
-PYTHONPATH=src python scripts/build_portable_data.py                 # 重建 data/package
-PYTHONPATH=src python scripts/build_portable_data.py --validate-only # 冷读复核
+python scripts/build_portable_data.py                 # 重建 data/package
+python scripts/build_portable_data.py --validate-only # 冷读复核
 ```
 
 产出：`data/package/corpus/articles/`（20,020 篇正文）及其余规范化表。
@@ -83,9 +83,9 @@ PYTHONPATH=src python scripts/build_portable_data.py --validate-only # 冷读复
 ### 5.2 语义向量索引
 
 ```powershell
-PYTHONPATH=src python scripts/build_vector_index.py                  # DashScope text-embedding-v3
-PYTHONPATH=src python scripts/build_vector_index.py --local-bge      # 离线 BGE 兜底
-PYTHONPATH=src python scripts/build_vector_index.py --validate-only
+python scripts/build_vector_index.py                  # DashScope text-embedding-v3
+python scripts/build_vector_index.py --local-bge      # 离线 BGE 兜底
+python scripts/build_vector_index.py --validate-only
 ```
 
 产物 `data/derived/vector_metadata/document_embeddings.npy`（20,020 × 1024，归一化）+ 构建报告。构建带断点续跑（`build_progress.json`），网络抖动可续。
@@ -93,7 +93,7 @@ PYTHONPATH=src python scripts/build_vector_index.py --validate-only
 ## 6. 测试
 
 ```powershell
-PYTHONPATH=src python -m pytest -q
+python -m pytest -q
 ```
 
 `tests/` 覆盖：路由/实体解析/图谱/全文/语义向量/可靠层（重试缓存）/模型路由（主备回退）/多轮指代/密钥解析/证据导出，全程离线不调 API。
@@ -108,7 +108,7 @@ PYTHONPATH=src python -m pytest -q
 | 嵌入/LLM `SSLError` 瞬时失败 | 已内置重试 + 断点续跑 |
 | 简化字「人间佛教」触发澄清 | 别名表歧义；用繁体「人間佛教」或补简体→繁体归一化 |
 | 高连接度实体回答偏慢 | reasoner 大证据块耗时；调小 top-N 证据或换推理模型 |
-| `pip install -e .` 报编码错 | 中文路径环境，改用 `PYTHONPATH=src` |
+| `pip install -e .` 报编码错 | 中文路径 editable 安装偶发；无需安装，直接 `python -m huidu_xingyun.cli …` |
 
 ## 8. 公开部署要点
 

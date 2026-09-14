@@ -42,9 +42,14 @@ from .routing import (
 )
 
 
-def _format_evidence(items: list[EvidenceItem]) -> str:
+def _format_evidence(items: list[EvidenceItem], limit: int | None = None) -> str:
+    """把证据包格式化为 LLM 提示文本；``limit`` 用于截断大证据块（完整证据仍进证据卡）。"""
+    if limit is not None and len(items) > limit:
+        shown = items[:limit]
+    else:
+        shown = items
     lines: list[str] = []
-    for index, item in enumerate(items, start=1):
+    for index, item in enumerate(shown, start=1):
         layer = item.layer.value if hasattr(item.layer, "value") else str(item.layer)
         if layer == "C":
             head = f"[{index}][C] {item.volume} {item.article_title}".strip()
@@ -57,6 +62,8 @@ def _format_evidence(items: list[EvidenceItem]) -> str:
             lines.append(f"  原文：{item.quote}")
         if item.url:
             lines.append(f"  出处：{item.url}")
+    if limit is not None and len(items) > limit:
+        lines.append(f"（证据共 {len(items)} 条，仅展示前 {limit} 条，按层级 A→B→C 优先）")
     return "\n".join(lines)
 
 
@@ -455,7 +462,7 @@ def build_nodes(ctx: AgentContext) -> dict[str, Callable[[dict[str, Any]], dict[
                     return {"draft_answer": _fallback_analytics_answer(state)}
             return {"draft_answer": _fallback_analytics_answer(state)}
         # 证据路线
-        evidence_block = _format_evidence(state.get("evidence_items", []))
+        evidence_block = _format_evidence(state.get("evidence_items", []), limit=20)
         paths_block = _format_paths(state.get("graph_paths", []))
         if bundle is not None and bundle.reasoner is not None:
             try:
@@ -477,7 +484,7 @@ def build_nodes(ctx: AgentContext) -> dict[str, Callable[[dict[str, Any]], dict[
         if route in ("llm_direct", "clarify_or_refuse", "graph_analytics"):
             return {"verification_result": {"passes": True, "sentence_checks": [], "summary": ""}}
         draft = state.get("draft_answer", "")
-        evidence_block = _format_evidence(state.get("evidence_items", []))
+        evidence_block = _format_evidence(state.get("evidence_items", []), limit=20)
         if bundle is not None and bundle.verifier is not None:
             result = None
             errors = list(state.get("errors") or [])
@@ -522,7 +529,7 @@ def build_nodes(ctx: AgentContext) -> dict[str, Callable[[dict[str, Any]], dict[
             return {"revision_count": state.get("revision_count", 0) + 1}
         feedback = (state.get("verification_result") or {}).get("summary", "")
         query = state["normalized_query"]
-        evidence_block = _format_evidence(state.get("evidence_items", []))
+        evidence_block = _format_evidence(state.get("evidence_items", []), limit=20)
         paths_block = _format_paths(state.get("graph_paths", []))
         prompt = answer_user_prompt(query, evidence_block, paths_block)
         prompt += f"\n\n上一稿审校反馈：{feedback}\n请修正上述问题后重新作答。"

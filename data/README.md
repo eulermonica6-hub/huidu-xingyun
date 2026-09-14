@@ -21,8 +21,8 @@
 python scripts/build_portable_data.py
 
 # 语义向量索引
-PYTHONPATH=src python scripts/build_vector_index.py            # DashScope 嵌入
-PYTHONPATH=src python scripts/build_vector_index.py --local-bge  # 离线 BGE
+python scripts/build_vector_index.py            # DashScope 嵌入
+python scripts/build_vector_index.py --local-bge  # 离线 BGE
 ```
 
 `package/` 只能由构建脚本生成，Agent 业务代码不得改写；所有生成数据必须记录生成时间、源版本、构建脚本与校验结果。
