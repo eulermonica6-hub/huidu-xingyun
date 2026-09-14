@@ -1,9 +1,5 @@
 # 作品建设说明书（草稿）
 
-> 对齐《首届高校图书馆"AI+管理服务"大赛作品建设说明书》（附件3）表单字段。
-> 本稿为 markdown 草稿，后续按表单字数控制与排版转 docx。
-> 所有规模与质量数据均取自冻结数据包 `data/package/quality/quality_metrics.json`
-> 与 `data/package/metadata/dataset.json`，不虚构、不夸大。
 
 ## 一、作品名称
 
