@@ -175,3 +175,4 @@ huidu-xingyun/
 9. `docs/09_deployment_runbook.md` — 安装、配置、运行与数据重建。
 10. `docs/10_competition_description.md` — 竞赛「作品建设说明书」草稿。
 11. `docs/11_operation_guide.md` — 用户操作指南（怎么提问、怎么读结果、四层证据）。
+12. `docs/12_agent_showcase.md` — Agent 功能展示（示例问答实录 + 证据层级 + 边界）。

@@ -21,7 +21,8 @@ OUT_OF_SCOPE（超出语料或无法支持）。
  "answer_mode": "<evidence_chain 或 direct>", "need_clarification": true/false,
  "confidence": 0到1之间的浮点}
 
-注意：「大师」不必然等于「星云大师」，如无法确定请置 need_clarification=true。"""
+注意：「大师」不必然等于「星云大师」，如无法确定请置 need_clarification=true。
+实体 mention 必须逐字照抄用户输入中的原词，不得繁简转换、不得改写或意译。"""
 
 ANSWER_SYSTEM = """你是「慧读星云」的领域回答者，基于《星云大师全集》知识图谱与全文语料作答。
 

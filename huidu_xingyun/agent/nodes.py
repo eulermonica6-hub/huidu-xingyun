@@ -122,6 +122,8 @@ def _coverage_notice(route: str, items: list[EvidenceItem]) -> str:
         return "本回答为一般说明或系统帮助，不来自《星云大师全集》语料。"
     if route == "clarify_or_refuse":
         return "当前问题需要澄清或超出可支持范围。"
+    if route == "graph_analytics":
+        return "结论基于冻结图谱网络指标（桥接得分等），属结构统计分析，非关系性证据。"
     if not items:
         return "当前正式图谱与全文语料均未检索到充分证据，无法给出有据结论。"
     layers = {item.layer for item in items}
@@ -252,13 +254,33 @@ def build_nodes(ctx: AgentContext) -> dict[str, Callable[[dict[str, Any]], dict[
     def resolve_entities(state: dict[str, Any]) -> dict[str, Any]:
         intent = state["intent"]
         mentions = [e.mention for e in intent.entities if e.mention]
+        # 原文子串提取最可靠：LLM 可能对提及做繁简转换/改写，原文提及优先补进。
+        verbatim = graph.extract_mentions(state["normalized_query"])
+        mentions = list(dict.fromkeys(verbatim + mentions)) if verbatim else mentions
         if not mentions:
             mentions = graph.extract_mentions(state["normalized_query"])
         carryover = state.get("carryover_names") or []
         if carryover and _has_backward_reference(state["normalized_query"]):
             mentions = list(dict.fromkeys(carryover + mentions))
         resolved = graph.resolve_entities(mentions)
-        return {"resolved_entities": resolved}
+        # 去重：若歧义项的候选与某个已唯一解析的实体重叠（LLM 繁简改写导致），以唯一解析为准丢弃歧义。
+        unique_ids = {e.entity_id for e in resolved if e.resolved and not e.is_ambiguous}
+        if unique_ids:
+            resolved = [
+                e
+                for e in resolved
+                if not (e.is_ambiguous and any(c.entity_id in unique_ids for c in e.candidates))
+            ]
+        # 去重：同一实体被原文提及 + LLM 提及各解析一次时，只保留一份。
+        seen_ids: set[str] = set()
+        deduped: list[Any] = []
+        for entity in resolved:
+            if entity.resolved:
+                if entity.entity_id in seen_ids:
+                    continue
+                seen_ids.add(entity.entity_id)
+            deduped.append(entity)
+        return {"resolved_entities": deduped}
 
     def plan_route(state: dict[str, Any]) -> dict[str, Any]:
         route = route_for_intent(state["intent"], state["resolved_entities"])
