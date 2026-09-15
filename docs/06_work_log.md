@@ -229,3 +229,27 @@
 
 - `python -m huidu_xingyun.cli ask "星云大师在哪些文章中谈到共生？"`（无任何环境变量）直接跑通。
 - `python -m pytest -q` 48 passed。
+
+## 2026-09-15 功能实测 + 展示文档 + 部署计划
+
+### 已完成
+
+- 示例问答实测：六条路由全部跑通（graph_retrieve/graph_direct/corpus_retrieve/graph_analytics/llm_direct/clarify_or_refuse）。
+- 实测发现并修复两个问题：
+  - graph_analytics 覆盖说明误报「无证据」→ 改为「冻结网络指标/结构统计」。
+  - LLM 把繁体「人間佛教」简化改写导致误判歧义 → 实体解析原文提及优先 + 去重，
+    并在 INTENT_SYSTEM 加「mention 逐字照抄、不繁简转换」。
+- 证据块截断 `_format_evidence(limit=20)`（LLM 提示只喂前 20 条）。
+- 产出证据包 3 份（`outputs/evidence_*.md`）。
+- 新增 `docs/12_agent_showcase.md`（Agent 功能展示）、`docs/13_deployment_plan.md`（公开部署计划）。
+- 验证：`python -m pytest -q` 48 passed；在线示例均产出结构化答案 + 证据。
+
+### 已知问题
+
+- 推送到 GitHub 受本机网络限制（github.com 无法连接，git push 失败），本地已 commit 待推。
+- 端到端延迟 30–90s（无缓存时），属演示体验待优化项。
+
+### 下一步
+
+1. 网络恢复后 `git push origin main`。
+2. 按 `docs/13_deployment_plan.md` 先补 FastAPI API 层，再搭最小三栏前端。

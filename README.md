@@ -176,3 +176,4 @@ huidu-xingyun/
 10. `docs/10_competition_description.md` — 竞赛「作品建设说明书」草稿。
 11. `docs/11_operation_guide.md` — 用户操作指南（怎么提问、怎么读结果、四层证据）。
 12. `docs/12_agent_showcase.md` — Agent 功能展示（示例问答实录 + 证据层级 + 边界）。
+13. `docs/13_deployment_plan.md` — 公开部署计划（FastAPI + 前端 + 部署 + 合规）。
