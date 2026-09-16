@@ -110,7 +110,9 @@ python -m pytest -q
 | 高连接度实体回答偏慢 | reasoner 大证据块耗时；调小 top-N 证据或换推理模型 |
 | `pip install -e .` 报编码错 | 中文路径 editable 安装偶发；无需安装，直接 `python -m huidu_xingyun.cli …` |
 
-## 8. 公开部署要点
+## 8. API 服务与公开部署要点
 
-- 前端仍未接入；CLI 为当前演示入口。公开部署须先补 API 层（FastAPI，`pyproject.toml` 已备 `api` extra）。
+- **API 层已实现**（`huidu_xingyun/server/`）：`python -m huidu_xingyun.server` 起服务，
+  `POST /api/v1/ask`、`POST /api/v1/export`、`GET /api/v1/health`（AgentContext 单例复用）。
+- 前端仍未接入；公开部署按 `docs/13_deployment_plan.md` 补三栏前端 → 反向代理/HTTPS → 合规备案。
 - 上线前完成：等保/大模型备案（以实际为准）、密钥轮换、只读数据库与代理、`docs/10_competition_description.md` 中「测试链接/账号」填写。

@@ -12,62 +12,12 @@ from __future__ import annotations
 import argparse
 import sys
 
-from .agent import (
-    AgentContext,
-    export_evidence_package,
-    history_entry,
-    run_agent,
-    run_agent_verbose,
-)
-from .config import SecretLoader, get_runtime_paths, get_settings
-from .models.factory import ModelBundle, ModelFactory
-from .models.cache import LLMCache
-from .repositories import CorpusRepository, GraphRepository
-from .repositories.vector_store import VectorStore
+from .agent import export_evidence_package, history_entry, run_agent, run_agent_verbose
+from .bootstrap import build_context
 from .schemas.response import FinalResponse
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
-
-
-def _attach_semantic(corpus: CorpusRepository, paths, loader: SecretLoader) -> None:
-    """如果向量索引存在，挂接语义检索；任何失败都静默降级为关键词检索。"""
-    index_path = paths.derived_root / "vector_metadata" / "document_embeddings.npy"
-    if not index_path.exists():
-        return
-    try:
-        from .repositories.embeddings import DashScopeEmbeddings, LocalBgeEmbeddings
-
-        api_key = loader.first_key("ali")
-        embedder = DashScopeEmbeddings(api_key) if api_key else LocalBgeEmbeddings()
-        store = VectorStore(index_path)
-        if store.count != corpus.size:
-            return
-        corpus.attach_semantic(store, embedder)
-    except Exception:  # noqa: BLE001 - 语义后端可选，失败无感降级
-        pass
-
-
-def build_context(use_llm: bool = True) -> AgentContext:
-    settings = get_settings()
-    paths = get_runtime_paths()
-
-    loader = SecretLoader(settings.secret_path)
-    loader.load()
-
-    graph = GraphRepository(paths).load()
-    corpus = CorpusRepository(paths).load()
-    _attach_semantic(corpus, paths, loader)
-
-    bundle = ModelBundle()
-    if use_llm:
-        try:
-            cache = LLMCache(paths.cache / "llm_cache.jsonl")
-            bundle = ModelFactory(settings, loader).build_bundle(cache=cache)
-        except Exception as exc:  # noqa: BLE001 - 降级为离线规则模式
-            print(f"[warn] 模型初始化失败：{type(exc).__name__}，将以离线规则模式运行。")
-
-    return AgentContext(bundle=bundle, graph=graph, corpus=corpus, settings=settings, paths=paths)
 
 
 def render(final: FinalResponse) -> str:

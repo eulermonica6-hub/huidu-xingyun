@@ -130,6 +130,12 @@ python scripts/build_vector_index.py
 
 # 7. 测试
 python -m pytest -q
+
+# 8. 启动 API 服务（公开部署阶段 1：AgentContext 单例复用）
+python -m huidu_xingyun.server            # 或 uvicorn huidu_xingyun.server.app:app --port 8000
+#   POST /api/v1/ask       {query, history?} → 结构化问答
+#   POST /api/v1/export    {query, history?} → 证据包导出
+#   GET  /api/v1/health    健康检查（模型/语料/图谱/向量）
 ```
 
 > 包采用扁平布局，直接在项目根目录运行 `python -m huidu_xingyun.cli …` 即可，无需 `pip install` 或 `PYTHONPATH`。若非要可安装打包，`pip install .`（非 editable）在中文路径下相对稳妥。
@@ -146,6 +152,7 @@ huidu-xingyun/
 │  ├─ models/            ModelFactory / 模型路由(router) / 重试(retry) / 缓存(cache) / 探测(probe)
 │  ├─ tools/             @tool 接口抽象层（蓝图约定，链接入 LangGraph 前由仓储层承载）
 │  ├─ agent/             nodes / routing / prompts / graph / pipeline / parsing
+│  ├─ server/            FastAPI 服务层（POST /api/v1/ask、export、health）
 │  └─ cli.py             ask / repl 入口
 ├─ scripts/              validate_foundation / build_portable_data / build_vector_index / probe_models
 ├─ tests/                48 项离线测试

@@ -265,3 +265,22 @@
   `DEFENSE_NOTICE` 常量；`verify_answer` 对 D 层回答跳过逐句审校。
 - CLI 与证据包导出同步展示「防御说明」。
 - 测试：`python -m pytest -q` 49 passed（新增 D 层离线用例）。
+
+## 2026-09-15 公开部署阶段 1：FastAPI API 层
+
+### 已完成
+
+- 抽取 `huidu_xingyun/bootstrap.py`：把 CLI 的密钥/数据/语义/模型装配收敛为 `build_context`，
+  CLI 与 API 服务共用。
+- 新增 `huidu_xingyun/server/`：FastAPI 应用，`AgentContext` 经 lifespan 启动期构建一次、
+  单例复用（实测 ~14s 一次性构建），`POST /api/v1/ask`、`POST /api/v1/export`、
+  `GET /api/v1/health`、`GET /api/v1/exports/{filename}`。
+- 版本化前缀 `/api/v1` + 模块化路由，预留后续扩展入口（前端子图/馆员反馈/流式回答）。
+- 安装 fastapi/uvicorn；`python -m huidu_xingyun.server` 为启动入口。
+- 更新 `docs/13_deployment_plan.md`（阶段 1 标记已实现）、runbook、README。
+
+### 验证结果
+
+- `python -m pytest -q` 52 passed（新增 API 层测试，复用离线 ctx）。
+- 真机 smoke：`TestClient` 触发 lifespan 构建上下文后 `/api/v1/health` 返回
+  status=ok、llm_ready=True、corpus=20020、vector=True、模型路由配置正确。

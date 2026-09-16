@@ -21,19 +21,19 @@ flowchart LR
     G --> M[LLM：qwen / 兜底]
 ```
 
-## 阶段 1：API 层（FastAPI）
+## 阶段 1：API 层（FastAPI）✅ 已实现
 
-新增 `huidu_xingyun/server/app.py`（或 `api.py`），复用现有 `run_agent_verbose`：
+已落地 `huidu_xingyun/server/`（`python -m huidu_xingyun.server` 或
+`uvicorn huidu_xingyun.server.app:app`）：
 
-- `POST /api/ask` — 入参 `{query, history?}`；返回 `FinalResponse`（已是 Pydantic，`response_model` 直用）。
-- `POST /api/export` — 触发证据包导出，返回下载路径/内容。
-- `GET /api/health` — 健康检查：模型就绪、数据计数、向量索引是否存在。
-- `GET /api/entities/{id}/neighborhood` — 前端「展开子图」用的邻域查询（薄封装 `GraphRepository`）。
+- `POST /api/v1/ask` — 入参 `{query, history?}`；返回 `FinalResponse`。
+- `POST /api/v1/export` — 问答并导出 Markdown 证据包。
+- `GET /api/v1/health` — 模型就绪 / 语料规模 / 图谱概览 / 向量索引存在性。
+- `GET /api/v1/exports/{filename}` — 下载已导出证据包。
+- `AgentContext` 通过 lifespan 启动期构建一次、单例复用（实测 14s 一次性构建）。
+- 版本化前缀 `/api/v1`，新功能在同名前缀下新增路由即可（预留入口）。
 
-要点：
-- `AgentContext` **进程内单例**：避免每请求重载 25k 实体 + 20k 文档 + 向量 mmap（当前是最大启动开销）。
-- 结构化输出（`FinalResponse`）与审计日志（`runtime/logs/audit.jsonl`）不变。
-- 异步：`run_agent` 是同步阻塞（LLM 调用），用 `run_in_executor` / `def` 端点避免阻塞事件循环；后续可 SSE 流式。
+待实现：前端三栏 UI、公网部署、合规材料（见阶段 2–4）。
 
 ## 阶段 2：前端（三栏布局）
 
