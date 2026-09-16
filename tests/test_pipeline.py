@@ -19,6 +19,15 @@ def test_offline_pipeline_general_chat(ctx):
     assert "不来自《星云大师全集》语料" in final.coverage_notice
 
 
+def test_offline_d_layer_fallback(ctx):
+    from huidu_xingyun.agent import run_agent_verbose
+
+    final, state = run_agent_verbose(ctx, "人工智能会取代宗教吗？")
+    assert state.get("d_layer") is True
+    assert final.defense_notice
+    assert "D 层" in final.coverage_notice
+
+
 def test_secret_loader_zhipu():
     loader = SecretLoader(get_settings().secret_path)
     loader.load()

@@ -28,10 +28,12 @@ from .context import AgentContext
 from .parsing import parse_json_object
 from .prompts import (
     ANSWER_SYSTEM,
-    DIRECT_SYSTEM,
+    DEFENSE_NOTICE,
+    D_SYSTEM,
     INTENT_SYSTEM,
     VERIFY_SYSTEM,
     answer_user_prompt,
+    d_layer_user_prompt,
     verify_user_prompt,
 )
 from .routing import (
@@ -451,20 +453,30 @@ def build_nodes(ctx: AgentContext) -> dict[str, Callable[[dict[str, Any]], dict[
             deduped.append(item)
         return {"evidence_items": deduped}
 
+    def _d_layer_answer(query: str) -> dict[str, Any]:
+        """开放型或无图谱证据问题 → D 层一般知识解释 + 防御说明。"""
+        if bundle is not None and bundle.reasoner is not None:
+            try:
+                draft = bundle.generate(
+                    [
+                        SystemMessage(content=D_SYSTEM),
+                        HumanMessage(content=d_layer_user_prompt(query)),
+                    ]
+                )
+                return {"draft_answer": draft, "d_layer": True}
+            except Exception:  # noqa: BLE001 - 模型异常退回占位说明
+                return {"draft_answer": "（回答模型暂时不可用，请稍后重试。）", "d_layer": True}
+        return {
+            "draft_answer": "（未检索到语料证据，且未配置回答模型，无法给出解释。）",
+            "d_layer": True,
+        }
+
     def generate_answer(state: dict[str, Any]) -> dict[str, Any]:
         route = state["route"]
         query = state["normalized_query"]
         if route == "llm_direct":
-            if bundle is not None and bundle.reasoner is not None:
-                try:
-                    return {
-                        "draft_answer": bundle.generate(
-                            [SystemMessage(content=DIRECT_SYSTEM), HumanMessage(content=query)]
-                        )
-                    }
-                except Exception:  # noqa: BLE001 - 模型异常退回占位说明
-                    return {"draft_answer": "（回答模型暂时不可用，请稍后重试。）"}
-            return {"draft_answer": "（系统当前未配置回答模型。）"}
+            # 直接回答无图谱/全文证据，一律按 D 层解释并附防御说明。
+            return _d_layer_answer(query)
         if route == "clarify_or_refuse":
             return {"draft_answer": _build_clarification(state)}
         if route == "graph_analytics":
@@ -484,7 +496,11 @@ def build_nodes(ctx: AgentContext) -> dict[str, Callable[[dict[str, Any]], dict[
                     return {"draft_answer": _fallback_analytics_answer(state)}
             return {"draft_answer": _fallback_analytics_answer(state)}
         # 证据路线
-        evidence_block = _format_evidence(state.get("evidence_items", []), limit=20)
+        items = state.get("evidence_items", [])
+        if not items and not state.get("graph_paths"):
+            # 图谱与全文均无证据 → 转入 D 层一般知识解释，附防御说明
+            return _d_layer_answer(query)
+        evidence_block = _format_evidence(items, limit=20)
         paths_block = _format_paths(state.get("graph_paths", []))
         if bundle is not None and bundle.reasoner is not None:
             try:
@@ -502,8 +518,8 @@ def build_nodes(ctx: AgentContext) -> dict[str, Callable[[dict[str, Any]], dict[
 
     def verify_answer(state: dict[str, Any]) -> dict[str, Any]:
         route = state["route"]
-        # 直接回答、澄清与图谱计算解释不套用证据逐句审校。
-        if route in ("llm_direct", "clarify_or_refuse", "graph_analytics"):
+        # 直接回答、澄清、图谱计算解释与 D 层（无证据）回答不套用证据逐句审校。
+        if state.get("d_layer") or route in ("llm_direct", "clarify_or_refuse", "graph_analytics"):
             return {"verification_result": {"passes": True, "sentence_checks": [], "summary": ""}}
         draft = state.get("draft_answer", "")
         evidence_block = _format_evidence(state.get("evidence_items", []), limit=20)
@@ -591,12 +607,19 @@ def build_nodes(ctx: AgentContext) -> dict[str, Callable[[dict[str, Any]], dict[
             for p in state.get("graph_paths", [])
         ]
         claims = [item.quote for item in items if item.layer == EvidenceLayer.CLAIM]
+        d_layer = bool(state.get("d_layer"))
+        coverage = (
+            "本回答为模型一般知识（D 层），不来自《星云大师全集》语料，可能不准确。"
+            if d_layer
+            else _coverage_notice(route, items)
+        )
         final = FinalResponse(
             answer=state.get("draft_answer", ""),
             evidence_cards=cards,
             graph_paths=graph_paths,
             contextual_claims=claims,
-            coverage_notice=_coverage_notice(route, items),
+            coverage_notice=coverage,
+            defense_notice=DEFENSE_NOTICE if d_layer else "",
             follow_up_actions=_follow_ups(route),
             route=route,
             trace_id=state.get("trace_id", ""),

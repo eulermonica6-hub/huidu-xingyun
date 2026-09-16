@@ -44,6 +44,7 @@ class FinalResponse(BaseModel):
     graph_paths: list[GraphPath] = Field(default_factory=list)
     contextual_claims: list[str] = Field(default_factory=list)
     coverage_notice: str = ""
+    defense_notice: str = ""
     follow_up_actions: list[FollowUpAction] = Field(default_factory=list)
     route: str = ""
     trace_id: str = ""

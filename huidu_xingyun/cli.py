@@ -74,6 +74,8 @@ def render(final: FinalResponse) -> str:
     lines = [final.answer.rstrip()]
     if final.coverage_notice:
         lines.append(f"\n[覆盖说明] {final.coverage_notice}")
+    if final.defense_notice:
+        lines.append(f"\n[防御说明] {final.defense_notice}")
     if final.graph_paths:
         lines.append("\n[关系路径]")
         for path in final.graph_paths:

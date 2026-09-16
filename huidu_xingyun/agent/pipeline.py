@@ -60,6 +60,9 @@ def export_evidence_package(final: FinalResponse, paths: RuntimePaths) -> Path:
     if final.coverage_notice:
         lines.append(f"> 覆盖说明：{final.coverage_notice}")
         lines.append("")
+    if final.defense_notice:
+        lines.append(f"> 防御说明：{final.defense_notice}")
+        lines.append("")
     if final.graph_paths:
         lines.append("## 关系路径")
         for path in final.graph_paths:

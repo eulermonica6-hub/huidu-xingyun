@@ -253,3 +253,15 @@
 
 1. 网络恢复后 `git push origin main`。
 2. 按 `docs/13_deployment_plan.md` 先补 FastAPI API 层，再搭最小三栏前端。
+
+## 2026-09-15 D 层开放回答 + 防御说明
+
+### 已完成
+
+- 新增 D 层一般知识回答路径：开放型问题（llm_direct）或图谱/全文证据为空时，
+  不再硬答「无证据」，而是调用 LLM 作一般解释，并附「防御说明」（不来自全集语料、
+  未经证据核验、请读者自行查阅原文与相关文献验证）。
+- 新增 `FinalResponse.defense_notice` / `AgentState.d_layer`；`D_SYSTEM` 提示词与
+  `DEFENSE_NOTICE` 常量；`verify_answer` 对 D 层回答跳过逐句审校。
+- CLI 与证据包导出同步展示「防御说明」。
+- 测试：`python -m pytest -q` 49 passed（新增 D 层离线用例）。

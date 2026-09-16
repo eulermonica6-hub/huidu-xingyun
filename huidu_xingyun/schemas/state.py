@@ -29,6 +29,7 @@ class AgentState(TypedDict, total=False):
     draft_answer: str
     verification_result: dict[str, Any]
     final_response: FinalResponse
+    d_layer: bool
     route: str
     errors: list[str]
     trace_id: str
