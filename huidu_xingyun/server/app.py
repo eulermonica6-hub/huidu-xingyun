@@ -22,6 +22,7 @@ from pathlib import Path
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from .. import __version__
 from ..agent import export_evidence_package, run_agent
@@ -99,6 +100,11 @@ def download_export(filename: str, http: Request) -> FileResponse:
 
         raise HTTPException(status_code=404, detail="证据包不存在")
     return FileResponse(path, media_type="text/markdown", filename=path.name)
+
+
+# 第四组：三栏前端（阶段 2，纯静态，托管在 /，不动 /api/v1）
+STATIC_DIR = Path(__file__).resolve().parent / "static"
+app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
 
 
 # 预留扩展入口：未来按同样模式新增，例如

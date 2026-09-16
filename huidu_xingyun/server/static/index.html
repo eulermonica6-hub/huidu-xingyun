@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>慧读星云 · 人间佛教智能研析平台</title>
+<style>
+  :root {
+    --bg: #f7f5f0; --panel: #ffffff; --ink: #2b2b2b; --muted: #7a7568;
+    --accent: #8a5a2b; --accent-2: #c8a06a; --line: #e7e1d6;
+    --a: #1f7a4d; --b: #b07a26; --c: #7a6a9e; --d: #9aa0a6;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 15px/1.55 -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--ink); }
+  header { padding: 12px 20px; background: var(--panel); border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 12px; }
+  header h1 { font-size: 18px; margin: 0; font-weight: 650; }
+  header .status { font-size: 12px; color: var(--muted); }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #d33; margin-right: 4px; }
+  .dot.ok { background: #2a9d4f; }
+  .layout { display: grid; grid-template-columns: 380px 1fr; grid-template-rows: 1fr 42vh; grid-template-areas: "chat graph" "chat evidence"; gap: 12px; padding: 12px; height: calc(100vh - 53px); }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; }
+  .panel > h2 { font-size: 13px; margin: 0; padding: 10px 14px; border-bottom: 1px solid var(--line); color: var(--muted); font-weight: 600; letter-spacing: .04em; }
+  #chat { grid-area: chat; }
+  #graph { grid-area: graph; }
+  #evidence { grid-area: evidence; }
+  #messages { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+  .msg { max-width: 92%; padding: 10px 12px; border-radius: 10px; white-space: pre-wrap; word-break: break-word; }
+  .msg.user { align-self: flex-end; background: var(--accent); color: #fff; }
+  .msg.assistant { align-self: flex-start; background: #f1ede4; }
+  .msg .meta { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .msg.user .meta { color: rgba(255,255,255,.75); }
+  #presets { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 12px; }
+  #presets button { font-size: 12px; border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 5px 11px; cursor: pointer; color: var(--ink); }
+  #presets button:hover { background: var(--accent-2); border-color: var(--accent-2); }
+  form#ask { display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid var(--line); }
+  form#ask input { flex: 1; padding: 9px 12px; border: 1px solid var(--line); border-radius: 8px; font-size: 14px; }
+  form#ask button { padding: 9px 16px; border: 0; background: var(--accent); color: #fff; border-radius: 8px; cursor: pointer; }
+  #graph-body, #evidence-body { flex: 1; overflow: auto; padding: 12px; }
+  .path { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 14px; }
+  .node { background: #fff; border: 1px solid var(--accent-2); border-radius: 8px; padding: 5px 10px; font-weight: 600; }
+  .rel { color: var(--muted); font-size: 12px; }
+  .arrow { color: var(--accent); }
+  .muted { color: var(--muted); font-size: 13px; }
+  .notice { padding: 8px 12px; border-radius: 8px; margin-bottom: 10px; font-size: 13px; }
+  .coverage { background: #f4efe6; border-left: 3px solid var(--accent-2); }
+  .defense { background: #fbf1e6; border-left: 3px solid #d9822b; }
+  .card { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; }
+  .card .layer { display: inline-block; font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 4px; margin-right: 8px; }
+  .layer.A { background: #e2f2e7; color: var(--a); }
+  .layer.B { background: #f7ecd8; color: var(--b); }
+  .layer.C { background: #ece9f5; color: var(--c); }
+  .layer.D { background: #eef0f2; color: var(--d); }
+  .card .title { font-weight: 600; }
+  .card .quote { color: #4a463d; margin: 6px 0; white-space: pre-wrap; }
+  .card a { color: var(--accent); font-size: 12px; }
+  @media (max-width: 760px) { .layout { grid-template-columns: 1fr; grid-template-rows: 45vh 30vh 45vh; grid-template-areas: "chat" "graph" "evidence"; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>慧读星云</h1>
+  <span class="subtitle muted">基于 AI 知识图谱的《星云大师全集》人间佛教智能研析与知识服务平台</span>
+  <span class="status"><span class="dot" id="dot"></span><span id="status-text">连接中…</span></span>
+</header>
+
+<main class="layout">
+  <section class="panel" id="chat">
+    <h2>对话</h2>
+    <div id="messages">
+      <div class="msg assistant">你好！我是慧读星云。可查询人物/教义/经典关系、多跳路径、原文出处、图谱结构，也可做专题阅读路线。回答均附证据层级与出处。</div>
+    </div>
+    <div id="presets"></div>
+    <form id="ask" autocomplete="off">
+      <input id="query" placeholder="输入问题，回车发送…" />
+      <button type="submit">发送</button>
+    </form>
+  </section>
+
+  <section class="panel" id="graph">
+    <h2>关系路径</h2>
+    <div id="graph-body"><div class="muted">暂无关系路径</div></div>
+  </section>
+
+  <section class="panel" id="evidence">
+    <h2>证据与说明</h2>
+    <div id="evidence-body"><div class="muted">暂无证据</div></div>
+  </section>
+</main>
+
+<script>
+const PRESETS = [
+  "星云大师如何解释人间佛教？",
+  "《维摩经》如何连接到人間佛教实践？",
+  "慈悲、教育与弘法之间有哪些关系？",
+  "哪些机构承担人间佛教传播的桥梁作用？",
+  "“大师”是否都指星云大师？",
+  "为“人间佛教与现代教育”生成一条专题阅读路线",
+  "人工智能会取代宗教吗？",
+];
+
+const $ = (id) => document.getElementById(id);
+const LAYER_CN = { A: "稳定关系", B: "语境命题", C: "全文线索", D: "一般知识" };
+let history = []; // 多轮上下文 [{query, entities}]
+
+function setStatus(ok, text) {
+  $("dot").className = "dot" + (ok ? " ok" : "");
+  $("status-text").textContent = text;
+}
+
+async function health() {
+  try {
+    const r = await fetch("/api/v1/health");
+    const d = await r.json();
+    setStatus(d.status === "ok", d.llm_ready ? "在线 · 模型就绪" : "在线 · 离线规则模式");
+  } catch (e) {
+    setStatus(false, "后端未连接");
+  }
+}
+
+function addMessage(role, text, meta) {
+  const div = document.createElement("div");
+  div.className = "msg " + role;
+  if (meta) div.innerHTML = '<div class="meta">' + meta + "</div>";
+  div.appendChild(document.createTextNode(text));
+  $("messages").appendChild(div);
+  $("messages").scrollTop = $("messages").scrollHeight;
+  return div;
+}
+
+function renderGraph(paths) {
+  const body = $("graph-body");
+  body.innerHTML = "";
+  if (!paths || !paths.length) { body.innerHTML = '<div class="muted">暂无关系路径</div>'; return; }
+  paths.forEach((p) => {
+    const wrap = document.createElement("div");
+    wrap.className = "path";
+    const nodes = p.nodes || [], rels = p.relations || [];
+    nodes.forEach((n, i) => {
+      const chip = document.createElement("span"); chip.className = "node"; chip.textContent = n;
+      wrap.appendChild(chip);
+      if (i < nodes.length - 1) {
+        const arrow = document.createElement("span"); arrow.className = "arrow"; arrow.textContent = "→";
+        const rel = document.createElement("span"); rel.className = "rel"; rel.textContent = rels[i] || "";
+        wrap.appendChild(rel); wrap.appendChild(arrow);
+      }
+    });
+    body.appendChild(wrap);
+  });
+}
+
+function renderEvidence(final) {
+  const body = $("evidence-body");
+  body.innerHTML = "";
+  if (final.coverage_notice) {
+    const d = document.createElement("div"); d.className = "notice coverage";
+    d.textContent = "覆盖说明：" + final.coverage_notice; body.appendChild(d);
+  }
+  if (final.defense_notice) {
+    const d = document.createElement("div"); d.className = "notice defense";
+    d.textContent = final.defense_notice; body.appendChild(d);
+  }
+  const cards = final.evidence_cards || [];
+  if (!cards.length && !final.coverage_notice) {
+    body.innerHTML = '<div class="muted">暂无证据</div>'; return;
+  }
+  cards.forEach((c) => {
+    const card = document.createElement("div"); card.className = "card";
+    const head = document.createElement("div");
+    head.innerHTML = '<span class="layer ' + c.layer + '">[' + c.layer + "] " + (LAYER_CN[c.layer] || "") + "</span>";
+    const title = document.createElement("span"); title.className = "title";
+    title.textContent = [c.volume, c.article_title].filter(Boolean).join(" ");
+    head.appendChild(title); card.appendChild(head);
+    if (c.quote) { const q = document.createElement("div"); q.className = "quote"; q.textContent = c.quote; card.appendChild(q); }
+    if (c.url) { const a = document.createElement("a"); a.href = c.url; a.target = "_blank"; a.textContent = "查看原文 ↗"; card.appendChild(a); }
+    body.appendChild(card);
+  });
+}
+
+async function ask(query) {
+  addMessage("user", query);
+  addMessage("assistant", "思考中…");
+  const spinner = $("messages").lastChild;
+  try {
+    const r = await fetch("/api/v1/ask", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query, history }),
+    });
+    const data = await r.json();
+    spinner.textContent = data.answer || "(无回答)";
+    if (data.route) { const m = document.createElement("div"); m.className = "meta"; m.textContent = "路由：" + data.route; spinner.prepend(m); }
+    renderGraph(data.graph_paths);
+    renderEvidence(data);
+    // 多轮：把本次已解析实体带入下一次（后端 FinalResponse 不含实体，这里仅记 query 由后端 history 语义支撑）
+    history.push({ query });
+  } catch (e) {
+    spinner.textContent = "请求失败：后端未连接";
+  }
+}
+
+$("ask").addEventListener("submit", (e) => { e.preventDefault(); const q = $("query").value.trim(); if (q) { $("query").value = ""; ask(q); } });
+$("presets").innerHTML = "";
+PRESETS.forEach((p) => { const b = document.createElement("button"); b.textContent = p; b.onclick = () => ask(p); $("presets").appendChild(b); });
+health();
+</script>
+</body>
+</html>

@@ -44,3 +44,12 @@ def test_export_endpoint(ctx, monkeypatch) -> None:
         data = resp.json()
         assert data["path"].endswith(".md")
         assert data["final_response"]["route"] == "graph_direct"
+
+
+def test_frontend_served(ctx, monkeypatch) -> None:
+    monkeypatch.setattr(app_module, "build_context", lambda use_llm=True: ctx)
+    with TestClient(app) as client:
+        resp = client.get("/")
+        assert resp.status_code == 200
+        assert "慧读星云" in resp.text
+        assert "/api/v1/ask" in resp.text

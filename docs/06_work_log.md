@@ -284,3 +284,19 @@
 - `python -m pytest -q` 52 passed（新增 API 层测试，复用离线 ctx）。
 - 真机 smoke：`TestClient` 触发 lifespan 构建上下文后 `/api/v1/health` 返回
   status=ok、llm_ready=True、corpus=20020、vector=True、模型路由配置正确。
+
+## 2026-09-15 公开部署阶段 2-4：三栏前端 + 部署配置 + 合规清单
+
+### 已完成
+
+- 阶段 2：新增静态三栏前端 `huidu_xingyun/server/static/index.html`（左对话 / 右关系路径 / 下证据），
+  预设示例问题、健康状态灯、多轮 history 回传；FastAPI 托管在 `/`（`/api/v1` 不受影响）。
+- 阶段 3：新增 `deploy/`（`nginx.conf.example`、`Caddyfile`、`README.md`）——反向代理/HTTPS 模板
+  与部署步骤；实际公网开通需服务器 + 域名，运维侧配合。
+- 阶段 4：新增 `docs/14_compliance_checklist.md`——等保定级/备案、等保测评、生成式 AI 备案清单，
+  以及平台已具备的合规友好设计；备案/测评由运营主体办理。
+- 更新 `docs/13_deployment_plan.md` 阶段 2–4 状态、README。
+
+### 验证结果
+
+- `python -m pytest -q` 53 passed（新增前端托管测试）。

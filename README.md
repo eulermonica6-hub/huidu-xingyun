@@ -155,7 +155,8 @@ huidu-xingyun/
 │  ├─ server/            FastAPI 服务层（POST /api/v1/ask、export、health）
 │  └─ cli.py             ask / repl 入口
 ├─ scripts/              validate_foundation / build_portable_data / build_vector_index / probe_models
-├─ tests/                48 项离线测试
+├─ deploy/               nginx / caddy 反向代理模板 + 部署说明
+├─ tests/                53 项离线测试
 ├─ data/package/         规范化运行数据（图谱/元数据入仓；正文另附）
 ├─ data/derived/         向量索引、探测报告（不入仓，可重建）
 ├─ docs/                 项目章程 / 数据契约 / 编排蓝图 / 模型策略 / 决策日志 / 工作日志 ...
@@ -184,3 +185,4 @@ huidu-xingyun/
 11. `docs/11_operation_guide.md` — 用户操作指南（怎么提问、怎么读结果、四层证据）。
 12. `docs/12_agent_showcase.md` — Agent 功能展示（示例问答实录 + 证据层级 + 边界）。
 13. `docs/13_deployment_plan.md` — 公开部署计划（FastAPI + 前端 + 部署 + 合规）。
+14. `docs/14_compliance_checklist.md` — 上线合规检查清单（等保/生成式 AI 备案）。

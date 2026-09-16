@@ -1,0 +1,9 @@
+# 反向代理示例：Caddy（自带自动 HTTPS，最简单）
+
+example.com {
+    reverse_proxy 127.0.0.1:8000 {
+        transport http {
+            read_timeout 300s  # LLM 推理较慢
+        }
+    }
+}
