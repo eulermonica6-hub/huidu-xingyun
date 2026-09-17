@@ -1,39 +1,88 @@
-# 部署目录
+# 公开部署：Hugging Face Space（主） + 本地 Tunnel（备）
 
-公网部署（阶段 3）所需配置模板与说明。**前提：一台可公网访问的服务器 + 域名。**
+拿测试链接的零成本路线：把 `huidu_xingyun.server` 打成 Docker 镜像推到 Hugging Face Space，
+几分钟拿到公开 HTTPS 链接，免费、无需备案，评委随时点开三栏交互 + 问答。
+备用/答辩现场用「本地起服务 + Cloudflare Tunnel」兜底。
 
-## 步骤
+## 一、主路线：Hugging Face Spaces + Docker
 
-1. **部署机环境**：
-   ```bash
-   # 安装依赖
-   pip install -e ".[api]"          # 或按 README 手动安装 fastapi/uvicorn + 业务依赖
-   # 放置数据：小数据（图谱/元数据）随仓库；正文与向量索引另附/重建
-   # 放置密钥：HUIDU_SECRET_FILE 指向外部密钥文件（不入 git）
-   ```
+### 1. 准备密钥（HF Secrets）
 
-2. **启动服务**（建议 systemd / supervisor 托管）：
-   ```bash
-   python -m huidu_xingyun.server          # 默认 0.0.0.0:8000
-   # 或 uvicorn huidu_xingyun.server.app:app --host 127.0.0.1 --port 8000
-   ```
+HF Space 无法访问仓库外的 `../LLM api key.txt`，密钥改由环境变量注入（`SecretLoader` 已支持）：
 
-3. **反向代理 + HTTPS**：
-   - nginx：参考 `deploy/nginx.conf.example`；
-   - caddy：参考 `deploy/Caddyfile`（自动申请/续期证书，最省事）。
+| 环境变量 | 对应 Provider |
+|---|---|
+| `DASHSCOPE_API_KEY` | ali（主） |
+| `ZHIPU_API_KEY` | zhipu（兜底） |
+| `DEEPSEEK_API_KEY` / `GROQ_API_KEY` / `NVIDIA_API_KEY` | 可选 |
 
-4. **验证**：
-   ```bash
-   curl http://127.0.0.1:8000/api/v1/health
-   curl -X POST http://127.0.0.1:8000/api/v1/ask -H 'Content-Type: application/json' \
-        -d '{"query": "星云大师在哪些文章中谈到共生？", "history": []}'
-   ```
+在 Space 的 **Settings → Secrets** 里添加上述变量（值＝你的密钥）。**不要把密钥写进仓库。**
 
-5. **回填测试链接/账号**：部署成功后把可访问 URL/二维码与演示账号写入
-   `docs/10_competition_description.md` 对应字段。
+### 2. 数据范围
 
-## 说明
+仓库已含**小数据**（图谱 16MB + 文章清单 9MB + 元数据 3.5MB），图谱问答/实体解析开箱即用。
+**正文全文（149MB）与向量索引（79MB）不入仓、不进镜像**，故 HF 免费档上「原文出处」类
+查询返回篇名 + URL 而非段落引用（`search_semantic` 无索引自动回退关键词/元数据）。
+如需完整引用：把正文与 `data/derived/vector_metadata` 上传到 Space 持久目录 `/data` 并在启动时挂接（后续可加）。
 
-- `AgentContext` 在服务启动期构建一次、单例复用；首次启动有 ~10–15s 数据加载。
-- 本机到公网的网络/服务器开通不在代码仓库内，需运维侧配合。
-- 系统依赖无状态（只读数据），可水平扩展；LLM 调用为同步阻塞，网关超时按需放宽到 300s。
+### 3. 创建 Space 并推送
+
+```bash
+# 1. 新建 Space：sdk 选 Docker（Public 或 Private 均可）
+# 2. 推送（或直接由 GitHub Actions 自动部署，见下）
+git remote add space https://huggingface.co/spaces/<你的用户名>/<space名>
+git push space main
+```
+
+HF 读取根目录 `Dockerfile` 构建镜像；应用监听 **7860**（`ENV HUIDU_PORT=7860` + `EXPOSE 7860`）。
+构建完成即得 `https://<用户名>-<space名>.hf.space`。
+
+### 4. 由 GitHub Actions 自动部署（推荐）
+
+`.github/workflows/deploy.yml` 已配：push 到 `main` 后跑单测 + 健康检查，通过后用
+`HF_TOKEN` 把 git 跟踪文件同步到 Space 仓库。
+
+在 GitHub 仓库配置：
+- **Secret** `HF_TOKEN`（HF 读写 token）；
+- **Variable** `HF_SPACE`（如 `你的用户名/huidu-xingyun`）。
+
+> 该步骤只同步 `git ls-files`（已提交文件），确保 `.env` / 正文 / 向量 / 运行产物不会被误传。
+
+## 二、备选：本地起服务 + Cloudflare Tunnel
+
+答辩/演示备用：本地起服务，一条隧道出公网链接，秒开。
+
+```bash
+# 1. 本地起服务
+python -m huidu_xingyun.server          # 0.0.0.0:8000
+
+# 2. 开隧道（一次性）
+cloudflared tunnel --url http://localhost:8000
+# 输出形如 https://xxxx.trycloudflare.com 的临时 HTTPS 链接
+```
+
+适合「临时抽风要演示最新未部署代码」的场景；端口在 FastAPI 内固定 8000（可由 `HUIDU_PORT` 调）。
+
+## 三、验收与压测
+
+```bash
+# 健康检查
+curl https://<space>.hf.space/api/v1/health
+
+# 问一条
+curl -X POST https://<space>.hf.space/api/v1/ask -H 'Content-Type: application/json' \
+     -d '{"query": "星云大师在哪些文章中谈到共生？", "history": []}'
+
+# 并发压测（对齐评审 1–3 并发）
+python scripts/load_test.py --base-url https://<space>.hf.space --health 30 --asks 6 --concurrency 3
+```
+
+**验收清单**：三栏交互（对话/路径/证据）→ 预设问题问答 → 健康状态灯 → 密钥未出现在前端与日志
+（前端只经 `/api/v1/*` 拿 `FinalResponse`，密钥仅在服务端进程内）。
+
+## 四、局限性（免费档）
+
+- CPU-only、内存有限：本项目重计算在**云端 LLM/嵌入 API**，本地只加载 ~29MB 小数据，免费档够用；
+  若以后接入本地模型推理/重计算，需升配 Paid 或把重计算移云端。
+- 冷启动：Space 空闲会被回收，首次请求触发重建（~15s 数据加载）。
+- 无后台任务/多副本：Long-running 或更高并发需走正式服务器路线（nginx + 域名 + 备案，见 `docs/13_deployment_plan.md` 阶段 3）。

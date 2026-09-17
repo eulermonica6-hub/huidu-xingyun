@@ -47,6 +47,16 @@ def test_secret_loader_multiline_json_array(tmp_path: Path) -> None:
     assert loader.first_key("ali") == "sk-ws-abc.def"
 
 
+def test_secret_loader_env_fallback(tmp_path: Path, monkeypatch) -> None:
+    # 无密钥文件时，回退读取环境变量（HF Space Secrets 场景）。
+    monkeypatch.setenv("DASHSCOPE_API_KEY", "sk-env-ali")
+    monkeypatch.setenv("ZHIPU_API_KEY", "env-zhipu")
+    loader = SecretLoader(tmp_path / "none.txt")
+    loader.load()
+    assert loader.first_key("ali") == "sk-env-ali"
+    assert loader.first_key("zhipu") == "env-zhipu"
+
+
 def test_redact_masks_tokens() -> None:
     redacted = redact("使用 sk-abc123 和 nvapi-xyz 以及 gsk_aaa")
     assert "sk-abc123" not in redacted

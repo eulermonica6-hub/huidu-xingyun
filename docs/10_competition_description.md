@@ -29,11 +29,12 @@
 
 ## 四、测试链接 / 二维码
 
-（占位：待出具可访问应用的 URL/二维码后填写。）
+（部署后填写：走 Hugging Face Spaces + Docker，链接形如 `https://<用户名>-<space名>.hf.space`；
+具体步骤与密钥/数据注入见 `deploy/README.md`，CI 自动部署见 `.github/workflows/deploy.yml`。）
 
 ## 五、测试账号
 
-（占位：待应用部署后提供演示账号。）
+（占位：无需注册/登录即可使用，留空或以实际部署为准。）
 
 ## 六、应用安全
 

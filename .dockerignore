@@ -1,0 +1,25 @@
+# Docker 构建上下文排除：密钥、大字数据、运行产物、开发文件
+.git
+.env
+.env.*
+!\.env.example
+*api key*.txt
+__pycache__/
+*.pyc
+.pytest_cache/
+.runtime/
+runtime/
+outputs/
+data/derived/
+data/package/corpus/articles/
+tests/
+docs/
+deploy/
+scripts/
+*.md
+!README.md
+.venv/
+venv/
+dist/
+build/
+*.egg-info/

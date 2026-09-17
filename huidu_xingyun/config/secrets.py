@@ -7,11 +7,21 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 from pathlib import Path
 
 ACCEPTED_LABELS = {"deepseek", "groq", "nvapi", "agnes", "zhipu", "ali"}
 _LABEL_PATTERN = re.compile(r"^([^:=：]+)\s*[:=：]\s*(.+)$")
+# Provider → 环境变量名（供 Hugging Face Secrets 等无文件环境注入密钥）。
+_ENV_KEYS = {
+    "deepseek": "DEEPSEEK_API_KEY",
+    "groq": "GROQ_API_KEY",
+    "nvapi": "NVIDIA_API_KEY",
+    "zhipu": "ZHIPU_API_KEY",
+    "ali": "DASHSCOPE_API_KEY",
+    "agnes": "AGNES_API_KEY",
+}
 _SECRET_PATTERN = re.compile(
     r"(?i)(sk-[A-Za-z0-9_.\-]+|nvapi-[A-Za-z0-9_\-]+|gsk_[A-Za-z0-9_\-]+)"
 )
@@ -86,7 +96,10 @@ class SecretLoader:
     def keys_for(self, label: str) -> list[str]:
         value = self._values.get(label.lower())
         if value is None:
-            return []
+            # 文件无该 Provider 密钥时，回退到环境变量（HF Space Secrets 等场景）。
+            env_name = _ENV_KEYS.get(label.lower())
+            env_value = os.getenv(env_name) if env_name else None
+            return [env_value] if env_value else []
         if isinstance(value, list):
             return value
         return [value]

@@ -1,0 +1,56 @@
+name: CI + Deploy to HF Space
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: |
+          pip install "langchain>=1.2,<2.0" "langgraph>=1.0,<2.0" \
+            langchain-openai langchain-deepseek langchain-groq langchain-nvidia-ai-endpoints \
+            "pydantic>=2.0,<3.0" "pydantic-settings>=2.0,<3.0" "python-dotenv>=1.0" \
+            "numpy>=1.26" "fastapi>=0.110" "uvicorn[standard]>=0.29" pytest httpx
+
+      - name: Run tests（CI 门禁：数据完整 + 路由/证据/模型路由/D 层/API）
+        run: python -m pytest -q
+
+      - name: Health smoke（构建 AgentContext → /api/v1/health）
+        run: |
+          python - <<'PY'
+          from fastapi.testclient import TestClient
+          from huidu_xingyun.server.app import app
+          with TestClient(app) as c:
+              d = c.get("/api/v1/health").json()
+              print("health:", d["status"], "corpus:", d["corpus_size"], "llm_ready:", d["llm_ready"])
+              assert d["status"] == "ok" and d["corpus_size"] == 20020
+          PY
+
+      - name: Deploy to HF Space（仅 main）
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_SPACE: ${{ vars.HF_SPACE }}
+        run: |
+          if [ -z "$HF_TOKEN" ] || [ -z "$HF_SPACE" ]; then
+            echo "跳过部署：未配置 HF_TOKEN / HF_SPACE"; exit 0
+          fi
+          OWNER="${HF_SPACE%%/*}"
+          git clone --depth=1 "https://${OWNER}:${HF_TOKEN}@huggingface.co/spaces/${HF_SPACE}" /tmp/space
+          # 只同步 git 跟踪文件（自动排除 .env / 正文 / 向量 / 运行产物，避免泄漏密钥与大字数据）
+          git ls-files > /tmp/files.txt
+          rsync -a --files-from=/tmp/files.txt ./ /tmp/space/
+          cd /tmp/space
+          git add -A
+          git -c user.email="ci@users.noreply.huggingface.co" -c user.name="GitHub CI" \
+              commit -m "deploy $(date -u +%FT%TZ)" || echo "无变更"
+          git push
